@@ -1,4 +1,5 @@
 /* pages/Auth.css */
+
 .auth-container {
   min-height: calc(100vh - 80px);
   display: flex;
@@ -6,6 +7,7 @@
   justify-content: center;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   padding: 2rem;
+  margin-top: 70px;
 }
 
 .auth-box {
@@ -44,6 +46,7 @@
 
 .form-group {
   margin-bottom: 1.5rem;
+  width: 100%;
 }
 
 .form-group label {
@@ -53,6 +56,7 @@
   font-weight: 500;
 }
 
+/* Input Fields - FIXED VISIBILITY */
 .form-group input,
 .form-group textarea {
   width: 100%;
@@ -62,13 +66,26 @@
   font-size: 1rem;
   transition: all 0.3s;
   font-family: inherit;
+  color: #1a1a1a !important;
+  background-color: #ffffff !important;
+  box-sizing: border-box;
 }
 
+/* Placeholder Styling */
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+  color: #aaa !important;
+  opacity: 1 !important;
+}
+
+/* Focus State */
 .form-group input:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: #FF6B35;
+  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+  color: #000 !important;
+  background-color: #fff !important;
 }
 
 .form-group textarea {
@@ -76,10 +93,81 @@
   min-height: 80px;
 }
 
+/* Password Wrapper */
+.password-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.password-input {
+  width: 100%;
+  padding: 0.8rem 3rem 0.8rem 1rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 1rem;
+  transition: all 0.3s;
+  color: #1a1a1a !important;
+  background-color: #ffffff !important;
+  box-sizing: border-box;
+}
+
+.password-input:focus {
+  outline: none;
+  border-color: #FF6B35;
+  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+}
+
+/* Password field with black dots */
+.password-input[type="password"] {
+  font-family: monospace;
+  letter-spacing: 2px;
+  font-size: 1rem;
+}
+
+.password-input[type="text"] {
+  font-family: inherit;
+  letter-spacing: normal;
+}
+
+/* Eye Button */
+.eye-button {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  color: #999;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.eye-button svg {
+  width: 22px;
+  height: 22px;
+}
+
+.eye-button:hover {
+  color: #FF6B35;
+}
+
+/* Password Hint */
+.password-hint {
+  display: block;
+  margin-top: 0.3rem;
+  font-size: 0.75rem;
+  color: #999;
+}
+
+/* Auth Button */
 .auth-btn {
   width: 100%;
   padding: 1rem;
-  background: #667eea;
+  background: linear-gradient(135deg, #FF6B35 0%, #FF8A5C 100%);
   color: white;
   border: none;
   border-radius: 10px;
@@ -90,28 +178,17 @@
   margin-top: 1rem;
 }
 
-.auth-btn:hover {
-  background: #5a67d8;
+.auth-btn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 5px 15px rgba(255, 107, 53, 0.4);
 }
 
-.auth-link {
-  text-align: center;
-  margin-top: 1.5rem;
-  color: #666;
+.auth-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
-.auth-link a {
-  color: #667eea;
-  text-decoration: none;
-  font-weight: 600;
-}
-
-.auth-link a:hover {
-  text-decoration: underline;
-}
-
+/* Error and Success Messages */
 .error-message {
   background: #fee;
   color: #c33;
@@ -120,4 +197,294 @@
   margin-bottom: 1.5rem;
   text-align: center;
   border: 1px solid #fcc;
+}
+
+.success-message {
+  background: #d4edda;
+  color: #155724;
+  padding: 1rem;
+  border-radius: 10px;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  border: 1px solid #c3e6cb;
+}
+
+/* OTP Actions */
+.otp-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.resend-btn, .back-btn {
+  flex: 1;
+  padding: 0.6rem;
+  background: none;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.3s;
+}
+
+.resend-btn {
+  color: #FF6B35;
+  border-color: #FF6B35;
+}
+
+.resend-btn:hover:not(.disabled) {
+  background: #FF6B35;
+  color: white;
+}
+
+.resend-btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.back-btn {
+  color: #666;
+}
+
+.back-btn:hover {
+  background: #f0f0f0;
+  border-color: #ccc;
+}
+
+/* Auth Link */
+.auth-link {
+  text-align: center;
+  margin-top: 1.5rem;
+  color: #666;
+}
+
+.auth-link a {
+  color: #FF6B35;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.auth-link a:hover {
+  text-decoration: underline;
+}
+
+/* Demo Info */
+.demo-info {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 10px;
+  text-align: center;
+  font-size: 0.85rem;
+  color: #666;
+  border: 1px solid #e0e0e0;
+}
+
+.demo-info p {
+  margin: 0.3rem 0;
+}
+
+.demo-info strong {
+  color: #FF6B35;
+}
+
+/* Tabs */
+.auth-tabs {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.auth-tab {
+  flex: 1;
+  padding: 0.8rem;
+  background: none;
+  border: none;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: #666;
+  transition: all 0.3s;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+}
+
+.auth-tab.active {
+  color: #FF6B35;
+  border-bottom-color: #FF6B35;
+}
+
+.auth-tab:hover:not(.active) {
+  color: #FF6B35;
+}
+
+/* OTP Input Specific - EXTRA VISIBILITY FIX */
+input[type="text"] {
+  color: #000 !important;
+  background-color: #fff !important;
+}
+
+input[type="text"]:focus {
+  color: #000 !important;
+}
+
+/* Mobile Input with Country Code */
+.mobile-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.country-code {
+  padding: 0.8rem 1rem;
+  background: #f5f5f5;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-weight: 600;
+  color: #333;
+}
+
+.mobile-input-wrapper input {
+  flex: 1;
+}
+
+/* ==================== CRITICAL OTP VISIBILITY FIX ==================== */
+/* FORCE OTP INPUT VISIBILITY */
+input[type="text"],
+input[type="number"],
+input[type="email"],
+input[type="password"],
+.form-group input,
+.form-group textarea,
+.password-input,
+.auth-box input {
+  color: #000000 !important;
+  background-color: #ffffff !important;
+  -webkit-text-fill-color: #000000 !important;
+  opacity: 1 !important;
+  text-shadow: none !important;
+  font-weight: 500 !important;
+}
+
+/* OTP Input Specific - BIGGER AND BOLDER */
+input[placeholder*="OTP"],
+input[placeholder*="otp"],
+input[name="otp"],
+.form-group input[type="text"] {
+  font-size: 1.3rem !important;
+  font-weight: bold !important;
+  text-align: center !important;
+  letter-spacing: 4px !important;
+  background: #ffffff !important;
+  border: 2px solid #FF6B35 !important;
+  color: #000000 !important;
+  padding: 12px !important;
+}
+
+/* Focus state for OTP */
+input[placeholder*="OTP"]:focus,
+input[placeholder*="otp"]:focus {
+  border-color: #FF6B35 !important;
+  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.2) !important;
+  outline: none !important;
+}
+
+/* Ensure text is visible when typing */
+input:focus,
+input:active,
+input:not(:placeholder-shown) {
+  color: #000000 !important;
+  -webkit-text-fill-color: #000000 !important;
+}
+
+/* Remove any transparency or overlays */
+.auth-box * {
+  color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+/* Fix for any potential CSS conflicts */
+.form-group input {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .auth-container {
+    padding: 1rem;
+    margin-top: 60px;
+  }
+  
+  .auth-box {
+    padding: 1.5rem;
+  }
+  
+  .auth-box h2 {
+    font-size: 1.5rem;
+  }
+  
+  .otp-actions {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .resend-btn, .back-btn {
+    width: 100%;
+  }
+  
+  .auth-tabs {
+    gap: 0.5rem;
+  }
+  
+  .auth-tab {
+    font-size: 0.9rem;
+    padding: 0.6rem;
+  }
+  
+  .mobile-input-wrapper {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .country-code {
+    text-align: center;
+  }
+}
+
+/* Extra Small Devices */
+@media (max-width: 480px) {
+  .auth-box {
+    padding: 1rem;
+  }
+  
+  .form-group input,
+  .form-group textarea,
+  .password-input {
+    padding: 0.6rem 0.8rem;
+    font-size: 0.9rem;
+  }
+  
+  .eye-button {
+    right: 10px;
+  }
+  
+  .eye-button svg {
+    width: 18px;
+    height: 18px;
+  }
+  
+  .auth-btn {
+    padding: 0.8rem;
+    font-size: 1rem;
+  }
+  
+  /* OTP on mobile */
+  input[placeholder*="OTP"],
+  input[placeholder*="otp"] {
+    font-size: 1.1rem !important;
+    letter-spacing: 2px !important;
+  }
 }

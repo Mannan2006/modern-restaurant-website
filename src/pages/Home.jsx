@@ -29,12 +29,12 @@ const Home = () => {
         <div className="hero-container">
           <div className="hero-content">
             <div className="hero-badge">✨ Premium Food Delivery</div>
-            <h1>Delicious Food <span className="highlight">Delivered</span> Fast 🍔</h1>
+            <h1>Delicious Food <span className="highlight">Delivered</span> Fast</h1>
             <p>Order your favorite meals anytime, anywhere. Fresh, hot, and delivered right to your doorstep.</p>
             <div className="hero-buttons">
-              <Link to="/menu" className="order-now-btn">Order Now</Link>
+              <Link to="/menu" className="order-now-btn">Order Now →</Link>
               {!user && (
-                <Link to="/signup" className="signup-btn-hero">Sign Up Free →</Link>
+                <Link to="/signup" className="signup-btn-hero">Sign Up Free</Link>
               )}
             </div>
             <div className="hero-stats">
@@ -53,6 +53,13 @@ const Home = () => {
             </div>
           </div>
           <div className="hero-image-premium">
+            <div className="hero-food-image">
+              <img 
+                src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=500&h=400&fit=crop" 
+                alt="Delicious Food" 
+                className="hero-main-img"
+              />
+            </div>
             <div className="floating-card card-1">
               <span className="food-icon">🍕</span>
               <span>Pizza</span>
@@ -62,11 +69,8 @@ const Home = () => {
               <span>Burger</span>
             </div>
             <div className="floating-card card-3">
-              <span className="food-icon">🥗</span>
-              <span>Healthy</span>
-            </div>
-            <div className="hero-main-image">
-              🍽️
+              <span className="food-icon">🍛</span>
+              <span>Biriyani</span>
             </div>
           </div>
         </div>
@@ -281,9 +285,9 @@ const Home = () => {
           </div>
           <div className="footer-section">
             <h4>Contact</h4>
-            <p>📞 +91 12345 67890</p>
-            <p>✉️ support@foodies.com</p>
-            <p>📍 Mumbai, India</p>
+            <p>📞 +91 8904021086</p>
+            <p>✉️ support@mannan200619@gmail.com</p>
+            <p>📍 Banglore, India</p>
           </div>
         </div>
         <div className="footer-bottom">

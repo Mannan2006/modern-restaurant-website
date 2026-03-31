@@ -415,6 +415,71 @@
   transform: scale(0.95);
 }
 
+/* ==================== QUANTITY CONTROLS ==================== */
+.quantity-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #f0f0f0;
+  border-radius: 30px;
+  padding: 0.2rem;
+}
+
+.qty-btn {
+  width: 32px;
+  height: 32px;
+  background: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #FF6B35;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.qty-btn:hover:not(:disabled) {
+  background: #FF6B35;
+  color: white;
+  transform: scale(1.05);
+}
+
+.qty-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.qty-value {
+  min-width: 28px;
+  text-align: center;
+  font-weight: bold;
+  font-size: 1rem;
+  color: #333;
+}
+
+/* Confirm Add Button */
+.confirm-add-btn {
+  width: 100%;
+  margin-top: 0.8rem;
+  padding: 0.6rem;
+  background: linear-gradient(135deg, #4CAF50, #45a049);
+  color: white;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.3s;
+}
+
+.confirm-add-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
 /* Toast Notification */
 .custom-toast {
   position: fixed;
@@ -518,5 +583,25 @@
     right: 20px;
     left: 20px;
     text-align: center;
+  }
+  
+  .quantity-controls {
+    gap: 0.3rem;
+  }
+  
+  .qty-btn {
+    width: 28px;
+    height: 28px;
+    font-size: 1rem;
+  }
+  
+  .qty-value {
+    min-width: 24px;
+    font-size: 0.9rem;
+  }
+  
+  .confirm-add-btn {
+    font-size: 0.8rem;
+    padding: 0.5rem;
   }
 }

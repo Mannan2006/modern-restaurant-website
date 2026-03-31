@@ -1,0 +1,122 @@
+/* Password Wrapper - Add to Auth.css */
+.password-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.password-input {
+  width: 100%;
+  padding: 0.8rem 2.5rem 0.8rem 1rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.3s;
+}
+
+.password-input:focus {
+  outline: none;
+  border-color: #FF6B35;
+  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+}
+
+/* Password field with black dots */
+.password-input[type="password"] {
+  font-family: monospace;
+  letter-spacing: 2px;
+  font-size: 1rem;
+}
+
+.password-input[type="text"] {
+  font-family: inherit;
+  letter-spacing: normal;
+}
+
+/* Eye Button */
+.eye-button {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+  transition: color 0.3s;
+}
+
+.eye-button:hover {
+  color: #FF6B35;
+}
+
+.eye-button svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Password Hint */
+.password-hint {
+  display: block;
+  margin-top: 0.3rem;
+  font-size: 0.75rem;
+  color: #999;
+}
+
+/* OTP Actions */
+.otp-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.resend-btn, .back-btn {
+  flex: 1;
+  padding: 0.6rem;
+  background: none;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.3s;
+}
+
+.resend-btn {
+  color: #FF6B35;
+  border-color: #FF6B35;
+}
+
+.resend-btn:hover {
+  background: #FF6B35;
+  color: white;
+}
+
+.back-btn {
+  color: #666;
+}
+
+.back-btn:hover {
+  background: #f0f0f0;
+  border-color: #ccc;
+}
+
+/* Demo Info */
+.demo-info {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.demo-info p {
+  margin: 0.3rem 0;
+}
+
+.demo-info strong {
+  color: #FF6B35;
+}
