@@ -1,0 +1,90 @@
+<!-- public/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover" />
+    <meta name="description" content="Foodies - Premium Food Delivery App. Order delicious food online from top restaurants. Fast delivery, hot food, and amazing deals!" />
+    <meta name="keywords" content="food delivery, online food, restaurant, order food, pizza, burger, foodies" />
+    <meta name="author" content="Foodies" />
+    <meta name="theme-color" content="#FF6B35" />
+    
+    <!-- Open Graph / Social Media Meta Tags -->
+    <meta property="og:title" content="Foodies - Food Delivery App" />
+    <meta property="og:description" content="Order delicious food online from top restaurants. Fast delivery, hot food, and amazing deals!" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/foodies-og-image.png" />
+    <meta property="og:url" content="https://foodies.app" />
+    
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Foodies - Food Delivery App" />
+    <meta name="twitter:description" content="Order delicious food online from top restaurants. Fast delivery, hot food, and amazing deals!" />
+    <meta name="twitter:image" content="/foodies-twitter-image.png" />
+    
+    <!-- Apple Touch Icon -->
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    
+    <!-- Preconnect for faster font loading -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    
+    <title>Foodies - Premium Food Delivery App</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+    <link rel="manifest" href="/manifest.json" />
+    
+    <!-- Preload critical assets -->
+    <link rel="preload" href="/vite.svg" as="image" />
+    
+    <style>
+      /* Simple loading indicator while React loads */
+      #root {
+        min-height: 100vh;
+      }
+      
+      .loading-screen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, #FF6B35 0%, #FF8A5C 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+      }
+      
+      .loading-spinner {
+        width: 50px;
+        height: 50px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+      
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root">
+      <!-- Simple loading indicator -->
+      <div class="loading-screen">
+        <div class="loading-spinner"></div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
