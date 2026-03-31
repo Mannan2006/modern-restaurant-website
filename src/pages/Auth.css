@@ -400,7 +400,7 @@ input:not(:placeholder-shown) {
 
 /* Remove any transparency or overlays */
 .auth-box * {
-  color-adjust: exact;
+  color-scheme: exact;
   -webkit-print-color-adjust: exact;
   print-color-adjust: exact;
 }
