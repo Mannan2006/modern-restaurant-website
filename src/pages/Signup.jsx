@@ -1,6 +1,7 @@
 // pages/Signup.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import './Auth.css';
 
 const Signup = () => {
@@ -20,12 +21,12 @@ const Signup = () => {
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
   const [resendTimer, setResendTimer] = useState(0);
+  const { signup } = useAuth();
   const navigate = useNavigate();
 
   // Clean up timers on unmount
   useEffect(() => {
     return () => {
-      // Clear any intervals when component unmounts
       const timer = window._resendTimer;
       if (timer) clearInterval(timer);
     };
@@ -35,18 +36,15 @@ const Signup = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Validate email format
   const isValidEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
 
-  // Validate password (at least 6 characters)
   const isValidPassword = (password) => {
     return password.length >= 6;
   };
 
-  // SEND OTP
   const handleSendOTP = (e) => {
     e.preventDefault();
     setError('');
@@ -54,7 +52,6 @@ const Signup = () => {
 
     const { name, email, password, confirmPassword, phone } = formData;
 
-    // Validation
     if (!name.trim()) {
       setError('Please enter your full name');
       return;
@@ -82,7 +79,6 @@ const Signup = () => {
 
     setLoading(true);
 
-    // Check if user already exists
     const users = JSON.parse(localStorage.getItem('users') || '[]');
     if (users.find(u => u.email === email)) {
       setError('User already exists with this email. Please login.');
@@ -90,10 +86,8 @@ const Signup = () => {
       return;
     }
 
-    // Generate OTP
     const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
 
-    // Store temp data
     localStorage.setItem('signup_temp', JSON.stringify(formData));
     localStorage.setItem('signup_otp', otpCode);
     localStorage.setItem('signup_otp_expiry', Date.now() + 5 * 60 * 1000);
@@ -103,7 +97,6 @@ const Signup = () => {
       setSuccess(`OTP sent to ${email}. Demo OTP: ${otpCode}`);
       setStep(2);
       
-      // Start resend timer
       setResendTimer(60);
       const timer = setInterval(() => {
         setResendTimer(prev => {
@@ -121,7 +114,6 @@ const Signup = () => {
     }, 1000);
   };
 
-  // Resend OTP
   const handleResendOTP = () => {
     if (resendTimer > 0) {
       setError(`Please wait ${resendTimer} seconds before requesting again`);
@@ -157,7 +149,6 @@ const Signup = () => {
     setTimeout(() => setSuccess(''), 5000);
   };
 
-  // VERIFY OTP
   const handleVerifyOTP = (e) => {
     e.preventDefault();
     setError('');
@@ -168,12 +159,16 @@ const Signup = () => {
       return;
     }
 
+    setLoading(true);
+    setSuccess('Verifying OTP...');
+
     const storedOtp = localStorage.getItem('signup_otp');
     const storedExpiry = localStorage.getItem('signup_otp_expiry');
     const userData = JSON.parse(localStorage.getItem('signup_temp'));
 
     if (!storedOtp || !userData) {
       setError('Session expired. Please start over.');
+      setLoading(false);
       setStep(1);
       return;
     }
@@ -182,6 +177,7 @@ const Signup = () => {
       setError('OTP has expired. Please request a new one.');
       localStorage.removeItem('signup_otp');
       localStorage.removeItem('signup_otp_expiry');
+      setLoading(false);
       setStep(1);
       setOtp('');
       return;
@@ -189,10 +185,13 @@ const Signup = () => {
 
     if (otp !== storedOtp) {
       setError('Invalid OTP. Please try again.');
+      setLoading(false);
       return;
     }
 
     // OTP Verified - Create user
+    setSuccess('OTP verified! Creating account...');
+
     const users = JSON.parse(localStorage.getItem('users') || '[]');
 
     const newUser = {
@@ -207,16 +206,27 @@ const Signup = () => {
 
     users.push(newUser);
     localStorage.setItem('users', JSON.stringify(users));
-    localStorage.setItem('user', JSON.stringify(newUser));
+    
+    // Use signup from AuthContext
+    signup(newUser);
 
     // Clear temp data
     localStorage.removeItem('signup_temp');
     localStorage.removeItem('signup_otp');
     localStorage.removeItem('signup_otp_expiry');
 
-    setSuccess('Account created successfully! Redirecting...');
+    // Clear timer
+    if (window._resendTimer) {
+      clearInterval(window._resendTimer);
+      window._resendTimer = null;
+    }
 
-    setTimeout(() => navigate('/'), 1500);
+    setSuccess('Account created successfully! Redirecting to menu...');
+
+    // Redirect to menu page after 1 second
+    setTimeout(() => {
+      navigate('/menu');
+    }, 1000);
   };
 
   return (
@@ -294,7 +304,6 @@ const Signup = () => {
                     type="button"
                     className="eye-button"
                     onClick={() => setShowPassword(!showPassword)}
-                    aria-label={showPassword ? "Hide password" : "Show password"}
                   >
                     {showPassword ? (
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -385,7 +394,9 @@ const Signup = () => {
                 />
               </div>
 
-              <button type="submit" className="auth-btn">Verify & Create Account</button>
+              <button type="submit" className="auth-btn" disabled={loading}>
+                {loading ? 'Verifying...' : 'Verify & Create Account'}
+              </button>
 
               <div className="otp-actions">
                 <button 
@@ -404,7 +415,7 @@ const Signup = () => {
                     setOtp('');
                     setError('');
                     setSuccess('');
-                    // Clear any timer
+                    setLoading(false);
                     if (window._resendTimer) {
                       clearInterval(window._resendTimer);
                       window._resendTimer = null;

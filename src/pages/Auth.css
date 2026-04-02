@@ -1,29 +1,34 @@
-/* pages/Auth.css */
+/* pages/Auth.css - Google Style */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
 .auth-container {
-  min-height: calc(100vh - 80px);
+  min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 2rem;
-  margin-top: 70px;
+  background: #fff;
+  padding: 1.5rem;
 }
 
 .auth-box {
-  background: white;
-  border-radius: 20px;
-  padding: 3rem;
   width: 100%;
-  max-width: 500px;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-  animation: slideUp 0.5s ease;
+  max-width: 450px;
+  background: white;
+  padding: 2.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  animation: fadeIn 0.3s ease;
 }
 
-@keyframes slideUp {
+@keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(30px);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
@@ -31,61 +36,139 @@
   }
 }
 
-.auth-box h2 {
-  font-size: 2rem;
-  color: #333;
-  margin-bottom: 0.5rem;
-  text-align: center;
-}
-
-.auth-box p {
-  color: #666;
+/* Logo Section */
+.auth-logo {
   text-align: center;
   margin-bottom: 2rem;
 }
 
+.auth-logo h1 {
+  font-size: 2rem;
+  font-weight: 500;
+  color: #1a73e8;
+  font-family: 'Google Sans', 'Product Sans', sans-serif;
+}
+
+.auth-logo p {
+  color: #5f6368;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+/* Tabs (Login/Signup) */
+.auth-tabs {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid #dadce0;
+}
+
+.auth-tab {
+  flex: 1;
+  background: none;
+  border: none;
+  padding: 0.8rem;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #5f6368;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.auth-tab.active {
+  color: #1a73e8;
+}
+
+.auth-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #1a73e8;
+}
+
+.auth-tab:hover:not(.active) {
+  color: #1a73e8;
+  background: #f8f9fa;
+}
+
+/* Login Method Tabs (Email/OTP) */
+.login-method-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  background: #f1f3f4;
+  border-radius: 32px;
+  padding: 0.25rem;
+}
+
+.method-tab {
+  flex: 1;
+  background: transparent;
+  border: none;
+  padding: 0.6rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #5f6368;
+  cursor: pointer;
+  border-radius: 32px;
+  transition: all 0.2s;
+}
+
+.method-tab.active {
+  background: white;
+  color: #1a73e8;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Headings */
+.auth-box h2 {
+  font-size: 1.5rem;
+  font-weight: 400;
+  color: #202124;
+  margin-bottom: 0.5rem;
+  text-align: left;
+}
+
+.auth-box p {
+  color: #5f6368;
+  font-size: 0.85rem;
+  margin-bottom: 1.5rem;
+  text-align: left;
+}
+
+/* Form Groups */
 .form-group {
   margin-bottom: 1.5rem;
-  width: 100%;
 }
 
 .form-group label {
   display: block;
   margin-bottom: 0.5rem;
-  color: #555;
+  color: #5f6368;
+  font-size: 0.8rem;
   font-weight: 500;
 }
 
-/* Input Fields - FIXED VISIBILITY */
 .form-group input,
 .form-group textarea {
   width: 100%;
   padding: 0.8rem 1rem;
-  border: 2px solid #e0e0e0;
-  border-radius: 10px;
+  border: 1px solid #dadce0;
+  border-radius: 4px;
   font-size: 1rem;
-  transition: all 0.3s;
+  transition: all 0.2s;
   font-family: inherit;
-  color: #1a1a1a !important;
-  background-color: #ffffff !important;
-  box-sizing: border-box;
 }
 
-/* Placeholder Styling */
-.form-group input::placeholder,
-.form-group textarea::placeholder {
-  color: #aaa !important;
-  opacity: 1 !important;
-}
-
-/* Focus State */
 .form-group input:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #FF6B35;
-  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
-  color: #000 !important;
-  background-color: #fff !important;
+  border-color: #1a73e8;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .form-group textarea {
@@ -101,86 +184,91 @@
 
 .password-input {
   width: 100%;
-  padding: 0.8rem 3rem 0.8rem 1rem;
-  border: 2px solid #e0e0e0;
-  border-radius: 10px;
+  padding: 0.8rem 2.5rem 0.8rem 1rem;
+  border: 1px solid #dadce0;
+  border-radius: 4px;
   font-size: 1rem;
-  transition: all 0.3s;
-  color: #1a1a1a !important;
-  background-color: #ffffff !important;
-  box-sizing: border-box;
+  transition: all 0.2s;
 }
 
 .password-input:focus {
   outline: none;
-  border-color: #FF6B35;
-  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
-}
-
-/* Password field with black dots */
-.password-input[type="password"] {
-  font-family: monospace;
-  letter-spacing: 2px;
-  font-size: 1rem;
-}
-
-.password-input[type="text"] {
-  font-family: inherit;
-  letter-spacing: normal;
+  border-color: #1a73e8;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 /* Eye Button */
 .eye-button {
   position: absolute;
-  right: 15px;
+  right: 12px;
   top: 50%;
   transform: translateY(-50%);
-  background: transparent;
+  background: none;
   border: none;
   cursor: pointer;
-  padding: 5px;
-  color: #999;
-  z-index: 10;
+  padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.eye-button svg {
-  width: 22px;
-  height: 22px;
+  color: #5f6368;
+  transition: color 0.2s;
 }
 
 .eye-button:hover {
-  color: #FF6B35;
+  color: #1a73e8;
+}
+
+.eye-button svg {
+  width: 20px;
+  height: 20px;
 }
 
 /* Password Hint */
 .password-hint {
   display: block;
   margin-top: 0.3rem;
-  font-size: 0.75rem;
-  color: #999;
+  font-size: 0.7rem;
+  color: #5f6368;
+}
+
+/* Mobile Input */
+.mobile-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.country-code {
+  padding: 0.8rem;
+  background: #f1f3f4;
+  border: 1px solid #dadce0;
+  border-radius: 4px;
+  font-weight: 500;
+  color: #202124;
+}
+
+.mobile-input-wrapper input {
+  flex: 1;
 }
 
 /* Auth Button */
 .auth-btn {
   width: 100%;
-  padding: 1rem;
-  background: linear-gradient(135deg, #FF6B35 0%, #FF8A5C 100%);
+  padding: 0.8rem;
+  background: #1a73e8;
   color: white;
   border: none;
-  border-radius: 10px;
-  font-size: 1.1rem;
-  font-weight: 600;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s;
-  margin-top: 1rem;
+  transition: all 0.2s;
+  margin-top: 0.5rem;
 }
 
 .auth-btn:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(255, 107, 53, 0.4);
+  background: #1557b0;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .auth-btn:disabled {
@@ -190,23 +278,25 @@
 
 /* Error and Success Messages */
 .error-message {
-  background: #fee;
-  color: #c33;
-  padding: 1rem;
-  border-radius: 10px;
+  background: #fce8e6;
+  color: #c5221f;
+  padding: 0.8rem;
+  border-radius: 4px;
   margin-bottom: 1.5rem;
-  text-align: center;
-  border: 1px solid #fcc;
+  text-align: left;
+  font-size: 0.85rem;
+  border-left: 4px solid #c5221f;
 }
 
 .success-message {
-  background: #d4edda;
-  color: #155724;
-  padding: 1rem;
-  border-radius: 10px;
+  background: #e6f4ea;
+  color: #137333;
+  padding: 0.8rem;
+  border-radius: 4px;
   margin-bottom: 1.5rem;
-  text-align: center;
-  border: 1px solid #c3e6cb;
+  text-align: left;
+  font-size: 0.85rem;
+  border-left: 4px solid #137333;
 }
 
 /* OTP Actions */
@@ -220,21 +310,21 @@
   flex: 1;
   padding: 0.6rem;
   background: none;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
+  border: 1px solid #dadce0;
+  border-radius: 4px;
   cursor: pointer;
-  font-size: 0.9rem;
-  transition: all 0.3s;
+  font-size: 0.85rem;
+  transition: all 0.2s;
 }
 
 .resend-btn {
-  color: #FF6B35;
-  border-color: #FF6B35;
+  color: #1a73e8;
+  border-color: #dadce0;
 }
 
 .resend-btn:hover:not(.disabled) {
-  background: #FF6B35;
-  color: white;
+  background: #e8f0fe;
+  border-color: #1a73e8;
 }
 
 .resend-btn.disabled {
@@ -243,25 +333,25 @@
 }
 
 .back-btn {
-  color: #666;
+  color: #5f6368;
 }
 
 .back-btn:hover {
-  background: #f0f0f0;
-  border-color: #ccc;
+  background: #f1f3f4;
 }
 
 /* Auth Link */
 .auth-link {
   text-align: center;
   margin-top: 1.5rem;
-  color: #666;
+  color: #5f6368;
+  font-size: 0.85rem;
 }
 
 .auth-link a {
-  color: #FF6B35;
+  color: #1a73e8;
   text-decoration: none;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .auth-link a:hover {
@@ -271,151 +361,28 @@
 /* Demo Info */
 .demo-info {
   margin-top: 1.5rem;
-  padding: 1rem;
+  padding: 0.8rem;
   background: #f8f9fa;
-  border-radius: 10px;
+  border-radius: 4px;
   text-align: center;
-  font-size: 0.85rem;
-  color: #666;
-  border: 1px solid #e0e0e0;
+  font-size: 0.75rem;
+  color: #5f6368;
+  border: 1px solid #dadce0;
 }
 
 .demo-info p {
-  margin: 0.3rem 0;
+  margin: 0.2rem 0;
+  text-align: center;
 }
 
 .demo-info strong {
-  color: #FF6B35;
+  color: #1a73e8;
 }
 
-/* Tabs */
-.auth-tabs {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 2rem;
-  border-bottom: 2px solid #f0f0f0;
-}
-
-.auth-tab {
-  flex: 1;
-  padding: 0.8rem;
-  background: none;
-  border: none;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  color: #666;
-  transition: all 0.3s;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -2px;
-}
-
-.auth-tab.active {
-  color: #FF6B35;
-  border-bottom-color: #FF6B35;
-}
-
-.auth-tab:hover:not(.active) {
-  color: #FF6B35;
-}
-
-/* OTP Input Specific - EXTRA VISIBILITY FIX */
-input[type="text"] {
-  color: #000 !important;
-  background-color: #fff !important;
-}
-
-input[type="text"]:focus {
-  color: #000 !important;
-}
-
-/* Mobile Input with Country Code */
-.mobile-input-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.country-code {
-  padding: 0.8rem 1rem;
-  background: #f5f5f5;
-  border: 2px solid #e0e0e0;
-  border-radius: 10px;
-  font-weight: 600;
-  color: #333;
-}
-
-.mobile-input-wrapper input {
-  flex: 1;
-}
-
-/* ==================== CRITICAL OTP VISIBILITY FIX ==================== */
-/* FORCE OTP INPUT VISIBILITY */
-input[type="text"],
-input[type="number"],
-input[type="email"],
-input[type="password"],
-.form-group input,
-.form-group textarea,
-.password-input,
-.auth-box input {
-  color: #000000 !important;
-  background-color: #ffffff !important;
-  -webkit-text-fill-color: #000000 !important;
-  opacity: 1 !important;
-  text-shadow: none !important;
-  font-weight: 500 !important;
-}
-
-/* OTP Input Specific - BIGGER AND BOLDER */
-input[placeholder*="OTP"],
-input[placeholder*="otp"],
-input[name="otp"],
-.form-group input[type="text"] {
-  font-size: 1.3rem !important;
-  font-weight: bold !important;
-  text-align: center !important;
-  letter-spacing: 4px !important;
-  background: #ffffff !important;
-  border: 2px solid #FF6B35 !important;
-  color: #000000 !important;
-  padding: 12px !important;
-}
-
-/* Focus state for OTP */
-input[placeholder*="OTP"]:focus,
-input[placeholder*="otp"]:focus {
-  border-color: #FF6B35 !important;
-  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.2) !important;
-  outline: none !important;
-}
-
-/* Ensure text is visible when typing */
-input:focus,
-input:active,
-input:not(:placeholder-shown) {
-  color: #000000 !important;
-  -webkit-text-fill-color: #000000 !important;
-}
-
-/* Remove any transparency or overlays */
-.auth-box * {
-  color-scheme: exact;
-  -webkit-print-color-adjust: exact;
-  print-color-adjust: exact;
-}
-
-/* Fix for any potential CSS conflicts */
-.form-group input {
-  -webkit-appearance: none !important;
-  appearance: none !important;
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
+/* Responsive */
+@media (max-width: 480px) {
   .auth-container {
     padding: 1rem;
-    margin-top: 60px;
   }
   
   .auth-box {
@@ -423,7 +390,7 @@ input:not(:placeholder-shown) {
   }
   
   .auth-box h2 {
-    font-size: 1.5rem;
+    font-size: 1.3rem;
   }
   
   .otp-actions {
@@ -433,15 +400,6 @@ input:not(:placeholder-shown) {
   
   .resend-btn, .back-btn {
     width: 100%;
-  }
-  
-  .auth-tabs {
-    gap: 0.5rem;
-  }
-  
-  .auth-tab {
-    font-size: 0.9rem;
-    padding: 0.6rem;
   }
   
   .mobile-input-wrapper {
@@ -454,37 +412,61 @@ input:not(:placeholder-shown) {
   }
 }
 
-/* Extra Small Devices */
-@media (max-width: 480px) {
-  .auth-box {
-    padding: 1rem;
-  }
-  
-  .form-group input,
-  .form-group textarea,
-  .password-input {
-    padding: 0.6rem 0.8rem;
-    font-size: 0.9rem;
-  }
-  
-  .eye-button {
-    right: 10px;
-  }
-  
-  .eye-button svg {
-    width: 18px;
-    height: 18px;
-  }
-  
-  .auth-btn {
-    padding: 0.8rem;
-    font-size: 1rem;
-  }
-  
-  /* OTP on mobile */
-  input[placeholder*="OTP"],
-  input[placeholder*="otp"] {
-    font-size: 1.1rem !important;
-    letter-spacing: 2px !important;
-  }
+/* ==================== OTP INPUT VISIBILITY FIX ==================== */
+
+/* Make OTP input text visible and clear */
+.form-group input[type="text"],
+input[type="text"],
+input[type="number"],
+input[type="tel"],
+input[type="email"],
+input[type="password"] {
+  color: #202124 !important;
+  background-color: #ffffff !important;
+  -webkit-text-fill-color: #202124 !important;
+}
+
+/* Specific OTP input styling */
+input[name="otp"],
+input[placeholder*="OTP"],
+input[placeholder*="otp"],
+input[placeholder*="code"],
+input[placeholder*="Code"] {
+  color: #202124 !important;
+  background-color: #ffffff !important;
+  font-size: 1.2rem !important;
+  font-weight: 500 !important;
+  text-align: center !important;
+  letter-spacing: 4px !important;
+  border: 1px solid #dadce0 !important;
+  border-radius: 4px !important;
+  padding: 12px !important;
+}
+
+/* OTP input focus state */
+input[placeholder*="OTP"]:focus,
+input[placeholder*="otp"]:focus,
+input[placeholder*="code"]:focus {
+  border-color: #1a73e8 !important;
+  outline: none !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Ensure text is visible when typing */
+input:focus,
+input:active,
+input:not(:placeholder-shown) {
+  color: #202124 !important;
+  -webkit-text-fill-color: #202124 !important;
+}
+
+/* Fix for any transparency issues */
+.auth-box input {
+  color: #202124 !important;
+  background: #ffffff !important;
+}
+
+/* Make sure the OTP value is black */
+input[value] {
+  color: #202124 !important;
 }

@@ -6,15 +6,14 @@ import { CartProvider } from './context/CartContext';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Menu from './pages/Menu';
-import Login from './pages/Login';
-import Signup from './pages/Signup';
+import Login from './pages/Login';     // ✓ Make sure this path is correct
+import Signup from './pages/Signup';   // ✓ Make sure this path is correct
 import Profile from './pages/Profile';
 import Cart from './pages/Cart';
 import Payment from './pages/Payment';
 import Orders from './pages/Orders';
 import './App.css';
 
-// Optional: Scroll to top component for better UX
 const ScrollToTop = () => {
   React.useEffect(() => {
     window.scrollTo(0, 0);

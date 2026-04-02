@@ -3,14 +3,54 @@
   min-height: 100vh;
   background: linear-gradient(135deg, #f5f7fa 0%, #e9edf2 100%);
   margin-top: 70px;
+  position: relative;
 }
 
-/* Hero Banner */
+/* Professional Background Pattern */
+.menu-page::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(circle at 20% 30%, rgba(102,126,234,0.03) 2%, transparent 2.5%),
+    radial-gradient(circle at 80% 70%, rgba(255,107,53,0.03) 2%, transparent 2.5%),
+    radial-gradient(circle at 40% 90%, rgba(118,75,162,0.02) 3%, transparent 3.5%);
+  background-size: 60px 60px, 50px 50px, 80px 80px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.menu-page > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Hero Banner - Premium Dark Gradient */
 .hero-banner {
   position: relative;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
   padding: 4rem 2rem;
   overflow: hidden;
+}
+
+/* Animated Shimmer Effect */
+.hero-banner::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+  animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+  0% { left: -100%; }
+  100% { left: 100%; }
 }
 
 .hero-bg-pattern {
@@ -19,18 +59,10 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-image: radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 2%, transparent 2.5%);
-  background-size: 30px 30px;
-  animation: patternMove 20s linear infinite;
-}
-
-@keyframes patternMove {
-  0% {
-    background-position: 0 0;
-  }
-  100% {
-    background-position: 60px 60px;
-  }
+  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" opacity="0.04"><path fill="white" d="M10,10 L20,10 L15,18 Z M40,30 L50,30 L45,38 Z M70,50 L80,50 L75,58 Z M30,70 L40,70 L35,78 Z M80,80 L90,80 L85,88 Z"/><circle cx="50" cy="20" r="2"/><circle cx="80" cy="40" r="2"/><circle cx="20" cy="60" r="2"/><circle cx="60" cy="80" r="2"/><circle cx="30" cy="40" r="1.5"/><circle cx="70" cy="20" r="1.5"/></svg>');
+  background-repeat: repeat;
+  background-size: 60px;
+  opacity: 0.5;
 }
 
 .hero-content {
@@ -47,14 +79,16 @@
 
 .hero-chip {
   display: inline-block;
-  background: rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.12);
   backdrop-filter: blur(10px);
   padding: 0.5rem 1rem;
   border-radius: 50px;
   font-size: 0.9rem;
-  color: white;
+  color: #FFD700;
   margin-bottom: 1rem;
   animation: fadeInUp 0.5s ease;
+  font-weight: 500;
+  letter-spacing: 1px;
 }
 
 .hero-text h1 {
@@ -62,10 +96,12 @@
   color: white;
   margin-bottom: 1rem;
   animation: fadeInUp 0.5s ease 0.1s both;
+  font-weight: 700;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.2);
 }
 
 .gradient-text {
-  background: linear-gradient(135deg, #FFD700, #FFF8DC);
+  background: linear-gradient(135deg, #FFD700, #FFA500, #FF6B35);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -77,7 +113,7 @@
   animation: fadeInUp 0.5s ease 0.2s both;
 }
 
-/* Search Box */
+/* Search Box - Glassmorphism */
 .search-wrapper {
   max-width: 550px;
   margin: 0 auto;
@@ -86,15 +122,18 @@
 
 .search-box-glow {
   position: relative;
-  background: white;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(10px);
   border-radius: 60px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  box-shadow: 0 15px 35px rgba(0,0,0,0.2);
   transition: all 0.3s ease;
+  border: 1px solid rgba(255,255,255,0.2);
 }
 
 .search-box-glow:focus-within {
   transform: translateY(-2px);
-  box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+  background: white;
 }
 
 .search-icon {
@@ -102,7 +141,7 @@
   left: 1.5rem;
   top: 50%;
   transform: translateY(-50%);
-  color: #667eea;
+  color: #FF6B35;
   font-size: 1.2rem;
 }
 
@@ -114,6 +153,11 @@
   font-size: 1rem;
   background: transparent;
   outline: none;
+  color: #333;
+}
+
+.search-input-glow::placeholder {
+  color: #999;
 }
 
 .clear-search {
@@ -128,14 +172,16 @@
   font-size: 1rem;
 }
 
-/* Category Strip */
+/* Category Strip - Glassmorphism */
 .category-strip {
   position: sticky;
   top: 70px;
-  background: white;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
   z-index: 50;
   padding: 1rem 0;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
 }
 
 .category-container {
@@ -153,28 +199,28 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.7rem 1.5rem;
-  background: #f0f0f0;
+  background: #f0f2f5;
   border: none;
   border-radius: 50px;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   font-size: 0.95rem;
   font-weight: 500;
-  color: #666;
+  color: #444;
   white-space: nowrap;
 }
 
 .category-pill:hover {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #FF6B35 0%, #FF8A5C 100%);
   color: white;
-  transform: translateY(-3px);
-  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(255,107,53,0.3);
 }
 
 .category-pill.active {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #FF6B35 0%, #FF8A5C 100%);
   color: white;
-  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 5px 15px rgba(255,107,53,0.4);
 }
 
 .pill-icon {
@@ -194,10 +240,9 @@
   gap: 2rem;
 }
 
-/* Glassmorphism Cards */
+/* Premium Cards */
 .menu-card-glass {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
+  background: white;
   border-radius: 24px;
   overflow: hidden;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -209,7 +254,7 @@
 }
 
 .menu-card-glass:hover {
-  transform: translateY(-12px);
+  transform: translateY(-8px);
   box-shadow: 0 25px 50px rgba(0,0,0,0.15);
 }
 
@@ -330,13 +375,13 @@
   display: flex;
   align-items: center;
   gap: 0.3rem;
-  background: #f0f0f0;
+  background: #f0f2f5;
   padding: 0.2rem 0.5rem;
   border-radius: 20px;
 }
 
 .stars {
-  color: #ffb800;
+  color: #FFB800;
   font-size: 0.8rem;
   letter-spacing: 1px;
 }
@@ -344,7 +389,7 @@
 .rating-number {
   font-size: 0.8rem;
   font-weight: 600;
-  color: #333;
+  color: #444;
 }
 
 .item-desc {
@@ -382,7 +427,7 @@
 .discount-price, .current-price {
   font-size: 1.3rem;
   font-weight: 800;
-  color: #667eea;
+  color: #FF6B35;
 }
 
 .current-price::before,
@@ -394,7 +439,7 @@
 
 /* Add Button */
 .add-button {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #FF6B35 0%, #FF8A5C 100%);
   color: white;
   border: none;
   padding: 0.6rem 1.2rem;
@@ -410,7 +455,7 @@
 
 .add-button:hover {
   transform: scale(1.05);
-  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 5px 15px rgba(255,107,53,0.4);
 }
 
 .add-button:active {
@@ -422,7 +467,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: #f0f0f0;
+  background: #f0f2f5;
   border-radius: 30px;
   padding: 0.2rem;
 }
@@ -540,7 +585,7 @@
 }
 
 .reset-btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #FF6B35 0%, #FF8A5C 100%);
   color: white;
   border: none;
   padding: 0.8rem 2rem;
@@ -553,7 +598,7 @@
 
 .reset-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 5px 15px rgba(255,107,53,0.4);
 }
 
 /* Responsive */
