@@ -18,9 +18,10 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [tempUser, setTempUser] = useState(null);
   const [resendTimer, setResendTimer] = useState(0);
+  const [loginMethod, setLoginMethod] = useState('otp'); // 'otp' or 'backend'
 
   const navigate = useNavigate();
-  const { otpLogin } = useAuth();
+  const { otpLogin, login: backendLogin } = useAuth();
 
   const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const isValidPassword = (password) => password.length >= 6;
@@ -32,7 +33,61 @@ const Login = () => {
     };
   }, []);
 
-  // STEP 1: SEND OTP
+  // BACKEND LOGIN (NEW)
+  const handleBackendLogin = async (e) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+    setLoading(true);
+
+    const { email, password } = formData;
+
+    if (!isValidEmail(email)) {
+      setError('Please enter a valid email address');
+      setLoading(false);
+      return;
+    }
+
+    if (!isValidPassword(password)) {
+      setError('Password must be at least 6 characters');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await fetch('http://localhost:5000/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+     if (response.ok) {
+  // ✅ Save token and user data
+  localStorage.setItem('token', data.token);
+  localStorage.setItem('user', JSON.stringify(data.user));
+
+  setSuccess('Login successful! Redirecting...');
+
+  setTimeout(() => {
+    window.location.reload(); // ✅ FIX
+  }, 1000);
+
+      } else {
+        setError(data.message || 'Login failed. Please try again.');
+      }
+    } catch (err) {
+      console.error('Login error:', err);
+      setError('Cannot connect to server. Please make sure the backend is running on port 5000');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // STEP 1: SEND OTP (EXISTING CODE - UNCHANGED)
   const handleSendOTP = (e) => {
     e.preventDefault();
     setError('');
@@ -86,7 +141,7 @@ const Login = () => {
     }, 1000);
   };
 
-  // STEP 2: VERIFY OTP
+  // STEP 2: VERIFY OTP (EXISTING CODE - UNCHANGED)
   const handleVerifyOTP = async (e) => {
     e.preventDefault();
     setError('');
@@ -219,7 +274,157 @@ const Login = () => {
   return (
     <div className="auth-container">
       <div className="auth-box">
-        {step === 1 ? (
+        {/* Login Method Tabs */}
+        <div className="login-method-tabs">
+          <button 
+            className={`method-tab ${loginMethod === 'otp' ? 'active' : ''}`}
+            onClick={() => {
+              setLoginMethod('otp');
+              setStep(1);
+              setError('');
+              setSuccess('');
+              setOtp('');
+              setLoading(false);
+            }}
+          >
+            OTP Login
+          </button>
+          <button 
+            className={`method-tab ${loginMethod === 'backend' ? 'active' : ''}`}
+            onClick={() => {
+              setLoginMethod('backend');
+              setError('');
+              setSuccess('');
+              setLoading(false);
+            }}
+          >
+            Email Login
+          </button>
+        </div>
+
+        {loginMethod === 'otp' ? (
+          // OTP LOGIN SECTION (EXISTING CODE - UNCHANGED)
+          step === 1 ? (
+            <>
+              <h2>Welcome Back!</h2>
+              <p>Login to continue ordering</p>
+
+              {error && <div className="error-message">{error}</div>}
+              {success && <div className="success-message">{success}</div>}
+
+              <form onSubmit={handleSendOTP}>
+                <div className="form-group">
+                  <label>Email</label>
+                  <input 
+                    type="email"
+                    name="email" 
+                    value={formData.email} 
+                    onChange={handleChange} 
+                    required 
+                    placeholder="Enter your email"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Password</label>
+                  <div className="password-wrapper">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      className="password-input"
+                      required
+                      placeholder="Enter your password (min 6 chars)"
+                    />
+                    <button 
+                      type="button" 
+                      className="eye-button"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? "🙈" : "👁️"}
+                    </button>
+                  </div>
+                  <small className="password-hint">Password must be at least 6 characters</small>
+                </div>
+
+                <button type="submit" className="auth-btn" disabled={loading}>
+                  {loading ? 'Sending OTP...' : 'Login with OTP'}
+                </button>
+              </form>
+
+              <div className="demo-info">
+                <p>✨ Demo: demo@example.com / 123456</p>
+              </div>
+
+              <p className="auth-link">
+                New user? <Link to="/signup">Sign up</Link>
+              </p>
+            </>
+          ) : (
+            <>
+              <h2>Verify OTP</h2>
+              <p>Enter the 6-digit code sent to <strong>{tempUser?.email || 'your email'}</strong></p>
+
+              {error && <div className="error-message">{error}</div>}
+              {success && <div className="success-message">{success}</div>}
+
+              <form onSubmit={handleVerifyOTP}>
+                <div className="form-group">
+                  <label>OTP Code</label>
+                  <input
+                    type="text"
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                    placeholder="Enter 6-digit OTP"
+                    maxLength="6"
+                    required
+                    autoFocus
+                  />
+                </div>
+
+                <button type="submit" className="auth-btn" disabled={loading}>
+                  {loading ? 'Verifying...' : 'Verify & Login'}
+                </button>
+
+                <div className="otp-actions">
+                  <button 
+                    type="button" 
+                    className={`resend-btn ${resendTimer > 0 ? 'disabled' : ''}`}
+                    onClick={handleResendOTP}
+                    disabled={resendTimer > 0}
+                  >
+                    {resendTimer > 0 ? `Resend in ${resendTimer}s` : 'Resend OTP'}
+                  </button>
+                  <button 
+                    type="button" 
+                    className="back-btn"
+                    onClick={() => {
+                      setStep(1);
+                      setOtp('');
+                      setError('');
+                      setSuccess('');
+                      setResendTimer(0);
+                      localStorage.removeItem('otp_data');
+                      localStorage.removeItem('temp_user');
+                      if (window._resendTimer) {
+                        clearInterval(window._resendTimer);
+                        window._resendTimer = null;
+                      }
+                    }}
+                  >
+                    ← Back to Login
+                  </button>
+                </div>
+              </form>
+
+              <p className="auth-link">
+                New user? <Link to="/signup">Sign up</Link>
+              </p>
+            </>
+          )
+        ) : (
+          // BACKEND LOGIN SECTION (NEW)
           <>
             <h2>Welcome Back!</h2>
             <p>Login to continue ordering</p>
@@ -227,9 +432,9 @@ const Login = () => {
             {error && <div className="error-message">{error}</div>}
             {success && <div className="success-message">{success}</div>}
 
-            <form onSubmit={handleSendOTP}>
+            <form onSubmit={handleBackendLogin}>
               <div className="form-group">
-                <label>Email</label>
+                <label>Email Address</label>
                 <input 
                   type="email"
                   name="email" 
@@ -237,6 +442,7 @@ const Login = () => {
                   onChange={handleChange} 
                   required 
                   placeholder="Enter your email"
+                  autoComplete="off"
                 />
               </div>
 
@@ -251,6 +457,7 @@ const Login = () => {
                     className="password-input"
                     required
                     placeholder="Enter your password (min 6 chars)"
+                    autoComplete="off"
                   />
                   <button 
                     type="button" 
@@ -264,77 +471,19 @@ const Login = () => {
               </div>
 
               <button type="submit" className="auth-btn" disabled={loading}>
-                {loading ? 'Sending OTP...' : 'Login with OTP'}
+                {loading ? 'Signing in...' : 'Sign in'}
               </button>
             </form>
 
             <div className="demo-info">
-              <p>✨ Demo: demo@example.com / 123456</p>
+              <p><strong>✨ Demo Credentials:</strong></p>
+              <p>Email: demo@example.com</p>
+              <p>Password: 123456</p>
+              <p style={{ fontSize: '0.7rem', marginTop: '0.5rem' }}>⚠️ Make sure backend is running on port 5000</p>
             </div>
 
             <p className="auth-link">
-              New user? <Link to="/signup">Sign up</Link>
-            </p>
-          </>
-        ) : (
-          <>
-            <h2>Verify OTP</h2>
-            <p>Enter the 6-digit code sent to <strong>{tempUser?.email || 'your email'}</strong></p>
-
-            {error && <div className="error-message">{error}</div>}
-            {success && <div className="success-message">{success}</div>}
-
-            <form onSubmit={handleVerifyOTP}>
-              <div className="form-group">
-                <label>OTP Code</label>
-                <input
-                  type="text"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                  placeholder="Enter 6-digit OTP"
-                  maxLength="6"
-                  required
-                  autoFocus
-                />
-              </div>
-
-              <button type="submit" className="auth-btn" disabled={loading}>
-                {loading ? 'Verifying...' : 'Verify & Login'}
-              </button>
-
-              <div className="otp-actions">
-                <button 
-                  type="button" 
-                  className={`resend-btn ${resendTimer > 0 ? 'disabled' : ''}`}
-                  onClick={handleResendOTP}
-                  disabled={resendTimer > 0}
-                >
-                  {resendTimer > 0 ? `Resend in ${resendTimer}s` : 'Resend OTP'}
-                </button>
-                <button 
-                  type="button" 
-                  className="back-btn"
-                  onClick={() => {
-                    setStep(1);
-                    setOtp('');
-                    setError('');
-                    setSuccess('');
-                    setResendTimer(0);
-                    localStorage.removeItem('otp_data');
-                    localStorage.removeItem('temp_user');
-                    if (window._resendTimer) {
-                      clearInterval(window._resendTimer);
-                      window._resendTimer = null;
-                    }
-                  }}
-                >
-                  ← Back to Login
-                </button>
-              </div>
-            </form>
-
-            <p className="auth-link">
-              New user? <Link to="/signup">Sign up</Link>
+              Don't have an account? <Link to="/signup">Sign up</Link>
             </p>
           </>
         )}

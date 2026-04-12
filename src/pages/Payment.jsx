@@ -1,5 +1,5 @@
 // src/pages/Payment.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
@@ -10,6 +10,7 @@ const Payment = () => {
   const [showQR, setShowQR] = useState(false);
   const [processing, setProcessing] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
+  const [orderId, setOrderId] = useState(null);
   
   const { cartItems, getCartTotal, clearCart } = useCart();
   const { user } = useAuth();
@@ -19,6 +20,14 @@ const Payment = () => {
   const subtotal = getCartTotal();
   const deliveryFee = 40;
   const total = subtotal + deliveryFee;
+
+  // Get order ID from cart if passed via location state
+  useEffect(() => {
+    const currentOrderId = localStorage.getItem('currentOrderId');
+    if (currentOrderId) {
+      setOrderId(currentOrderId);
+    }
+  }, []);
 
   // If cart is empty, redirect to menu
   if (cartItems.length === 0 && !orderPlaced) {
@@ -35,27 +44,71 @@ const Payment = () => {
     }
   };
 
-  const handlePlaceOrder = async () => {
-    if (!paymentMethod) {
-      alert('Please select a payment method');
+const handlePlaceOrder = async () => {
+  if (!paymentMethod) {
+    alert('Please select a payment method');
+    return;
+  }
+
+  setProcessing(true);
+
+  try {
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+      alert('Session expired. Please login again.');
+      navigate('/login');
       return;
     }
 
-    setProcessing(true);
+    // ✅ UPDATE EXISTING ORDER
+    if (orderId) {
+      const response = await fetch(`http://localhost:5000/api/orders/${orderId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-auth-token': token
+        },
+        body: JSON.stringify({
+          paymentMethod: paymentMethod,
+          paymentStatus: paymentMethod === 'cod' ? 'Pending' : 'Paid',
+          status: 'confirmed'
+        })
+      });
 
-    // Simulate payment processing
-    setTimeout(() => {
-      // Create order object
-      const order = {
-        id: Date.now(),
-        items: cartItems,
-        subtotal: subtotal,
-        deliveryFee: deliveryFee,
-        total: total,
-        paymentMethod: paymentMethod,
+      const data = await response.json();
+
+      if (response.ok) {
+        console.log('✅ Order updated:', data);
+
+        setOrderPlaced(true);
+        clearCart();
+        localStorage.removeItem('currentOrderId');
+
+        setTimeout(() => {
+          navigate('/orders');
+        }, 3000);
+      } else {
+        console.error('❌ Update failed:', data);
+        alert(data.message || 'Failed to update order');
+      }
+    } 
+    // ✅ FALLBACK: CREATE NEW ORDER
+    else {
+      const orderData = {
+        items: cartItems.map(item => ({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity,
+          image: item.image || '🍽️'
+        })),
+        subtotal,
+        deliveryFee,
+        total,
+        paymentMethod,
         paymentStatus: paymentMethod === 'cod' ? 'Pending' : 'Paid',
-        date: new Date().toISOString(),
-        status: 'Confirmed',
+        status: 'confirmed',
         customer: {
           name: user?.name,
           email: user?.email,
@@ -64,20 +117,35 @@ const Payment = () => {
         }
       };
 
-      // Save order to localStorage
-      const existingOrders = JSON.parse(localStorage.getItem('orders') || '[]');
-      localStorage.setItem('orders', JSON.stringify([order, ...existingOrders]));
+      const response = await fetch('http://localhost:5000/api/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-auth-token': token
+        },
+        body: JSON.stringify(orderData)
+      });
 
-      setOrderPlaced(true);
-      clearCart();
-      setProcessing(false);
+      const data = await response.json();
 
-      // Show success message and redirect to orders after 3 seconds
-      setTimeout(() => {
-        navigate('/orders');
-      }, 3000);
-    }, 2000);
-  };
+      if (response.ok) {
+        setOrderPlaced(true);
+        clearCart();
+
+        setTimeout(() => {
+          navigate('/orders');
+        }, 3000);
+      } else {
+        alert(data.message || 'Failed to place order');
+      }
+    }
+  } catch (err) {
+    console.error('❌ Error:', err);
+    alert('Cannot connect to server');
+  } finally {
+    setProcessing(false);
+  }
+};
 
   if (orderPlaced) {
     return (
@@ -87,7 +155,7 @@ const Payment = () => {
           <h2>Order Placed Successfully!</h2>
           <p>Thank you for ordering with Foodies</p>
           <div className="order-details-summary">
-            <p>Order ID: #{Date.now().toString().slice(-8)}</p>
+            <p>Order ID: #{orderId ? orderId.toString().slice(-8) : Date.now().toString().slice(-8)}</p>
             <p>Payment Method: {paymentMethod === 'qr' ? 'QR Code' : paymentMethod === 'cod' ? 'Cash on Delivery' : paymentMethod}</p>
             <p>Total Amount: ₹{total}</p>
           </div>
@@ -233,7 +301,7 @@ const Payment = () => {
               <div className="qr-details">
                 <p><strong>UPI ID:</strong> foodies@okhdfcbank</p>
                 <p><strong>Amount:</strong> ₹{total}</p>
-                <p><strong>Order ID:</strong> #{Date.now().toString().slice(-8)}</p>
+                <p><strong>Order ID:</strong> #{orderId ? orderId.toString().slice(-8) : Date.now().toString().slice(-8)}</p>
               </div>
               <button className="copy-upi-btn" onClick={() => {
                 navigator.clipboard.writeText('foodies@okhdfcbank');

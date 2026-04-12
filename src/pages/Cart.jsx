@@ -1,5 +1,5 @@
 // src/pages/Cart.jsx
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
@@ -9,6 +9,7 @@ const Cart = () => {
   const { cartItems, removeFromCart, updateQuantity, getCartTotal, clearCart } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false);
 
   if (!user) {
     navigate('/login');
@@ -19,12 +20,72 @@ const Cart = () => {
   const deliveryFee = 40;
   const total = subtotal + deliveryFee;
 
-  const handlePlaceOrder = () => {
-    if (cartItems.length === 0) return;
-    // Navigate to payment page
-    navigate('/payment');
+  // Save order to backend before navigating to payment
+  const handlePlaceOrder = async () => {
+  console.log('🟢 1. Button clicked');
+  console.log('🟢 2. Cart items:', cartItems);
+  
+  if (cartItems.length === 0) return;
+  
+  setIsPlacingOrder(true);
+  
+  const orderData = {
+    items: cartItems.map(item => ({
+      id: item.id,
+      name: item.name,
+      price: item.price,
+      quantity: item.quantity,
+      image: item.image || '🍽️'
+    })),
+    subtotal: subtotal,
+    deliveryFee: deliveryFee,
+    total: total,
+    status: 'pending'
   };
+  
+  console.log('🟢 3. Order data being sent:', orderData);
+  
+  try {
+  const token = localStorage.getItem('token');
 
+if (!token || token === 'undefined' || token === 'null') {
+  alert('Session expired. Please login again.');
+  navigate('/login');
+  return;
+}
+
+console.log('🟢 Token exists ✅');
+console.log('🟢 Token preview:', token.substring(0, 50) + '...');
+    
+    const response = await fetch('http://localhost:5000/api/orders', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-auth-token': token
+      },
+      body: JSON.stringify(orderData)
+    });
+    
+    console.log('🟢 6. Response status:', response.status);
+    
+    const data = await response.json();
+    console.log('🟢 7. Response data:', data);
+    
+    if (response.ok) {
+      console.log('✅ Order created! ID:', data.order._id);
+      localStorage.setItem('currentOrderId', data.order._id);
+      navigate('/payment');
+    } else {
+      console.error('❌ Order failed:', data);
+      alert(`Failed to create order: ${data.message || 'Please try again'}`);
+      setIsPlacingOrder(false);
+    }
+  } catch (err) {
+    console.error('❌ Catch error:', err);
+    alert('Cannot connect to server. Please make sure backend is running on port 5000');
+    setIsPlacingOrder(false);
+  }
+};
   if (cartItems.length === 0) {
     return (
       <div className="cart-container empty-cart">
@@ -50,8 +111,18 @@ const Cart = () => {
           
           {cartItems.map(item => (
             <div key={item.id} className="cart-item">
+              {/* ✅ FIXED: Now showing actual image instead of URL text */}
               <div className="item-image">
-                {item.image || '🍽️'}
+                <img 
+                  src={item.image} 
+                  alt={item.name}
+                  className="cart-item-img"
+                  onError={(e) => {
+                    // Fallback emoji or placeholder image if image fails to load
+                    e.target.style.display = 'none';
+                    e.target.parentElement.innerHTML = '🍽️';
+                  }}
+                />
               </div>
               
               <div className="item-details">
@@ -122,8 +193,9 @@ const Cart = () => {
           <button 
             className="place-order-btn"
             onClick={handlePlaceOrder}
+            disabled={isPlacingOrder}
           >
-            Proceed to Payment
+            {isPlacingOrder ? 'Creating Order...' : 'Proceed to Payment'}
           </button>
           
           <button 

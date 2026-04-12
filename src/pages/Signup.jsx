@@ -21,6 +21,7 @@ const Signup = () => {
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
   const [resendTimer, setResendTimer] = useState(0);
+  const [signupMethod, setSignupMethod] = useState('otp'); // 'otp' or 'backend'
   const { signup } = useAuth();
   const navigate = useNavigate();
 
@@ -45,6 +46,74 @@ const Signup = () => {
     return password.length >= 6;
   };
 
+  // BACKEND SIGNUP (NEW)
+  const handleBackendSignup = async (e) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+    setLoading(true);
+
+    const { name, email, password, confirmPassword, phone, address } = formData;
+
+    if (!name.trim()) {
+      setError('Please enter your full name');
+      setLoading(false);
+      return;
+    }
+
+    if (!isValidEmail(email)) {
+      setError('Please enter a valid email address');
+      setLoading(false);
+      return;
+    }
+
+    if (!isValidPassword(password)) {
+      setError('Password must be at least 6 characters long');
+      setLoading(false);
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      setLoading(false);
+      return;
+    }
+
+    if (phone && phone.length !== 10) {
+      setError('Please enter a valid 10-digit phone number');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await fetch('http://localhost:5000/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password, phone, address })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        signup(data.user);
+        setSuccess('Account created successfully! Redirecting to menu...');
+        setTimeout(() => {
+          navigate('/menu');
+        }, 1500);
+      } else {
+        setError(data.message || 'Signup failed. Please try again.');
+      }
+    } catch (err) {
+      console.error('Signup error:', err);
+      setError('Cannot connect to server. Please make sure the backend is running on port 5000');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // SEND OTP (EXISTING - UNCHANGED)
   const handleSendOTP = (e) => {
     e.preventDefault();
     setError('');
@@ -232,7 +301,239 @@ const Signup = () => {
   return (
     <div className="auth-container">
       <div className="auth-box">
-        {step === 1 ? (
+        {/* Signup Method Tabs */}
+        <div className="login-method-tabs">
+          <button 
+            className={`method-tab ${signupMethod === 'otp' ? 'active' : ''}`}
+            onClick={() => {
+              setSignupMethod('otp');
+              setStep(1);
+              setError('');
+              setSuccess('');
+              setOtp('');
+              setLoading(false);
+            }}
+          >
+            OTP Signup
+          </button>
+          <button 
+            className={`method-tab ${signupMethod === 'backend' ? 'active' : ''}`}
+            onClick={() => {
+              setSignupMethod('backend');
+              setError('');
+              setSuccess('');
+              setLoading(false);
+            }}
+          >
+            Email Signup
+          </button>
+        </div>
+
+        {signupMethod === 'otp' ? (
+          // OTP SIGNUP SECTION (EXISTING - UNCHANGED)
+          step === 1 ? (
+            <>
+              <h2>Create Account</h2>
+              <p>Join Foodies today!</p>
+
+              {error && <div className="error-message">{error}</div>}
+              {success && <div className="success-message">{success}</div>}
+
+              <form onSubmit={handleSendOTP}>
+                <div className="form-group">
+                  <label>Full Name</label>
+                  <input
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    required
+                    placeholder="Enter your full name"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Email Address</label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                    placeholder="Enter your email"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Phone Number (Optional)</label>
+                  <input
+                    type="tel"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    placeholder="10-digit mobile number"
+                    maxLength="10"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Address (Optional)</label>
+                  <textarea
+                    name="address"
+                    value={formData.address}
+                    onChange={handleChange}
+                    placeholder="Enter your delivery address"
+                    rows="2"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Password</label>
+                  <div className="password-wrapper">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      required
+                      placeholder="Create a password (min. 6 characters)"
+                      className="password-input"
+                    />
+                    <button 
+                      type="button"
+                      className="eye-button"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? (
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                          <circle cx="12" cy="12" r="3"></circle>
+                          <line x1="2" y1="2" x2="22" y2="22"></line>
+                        </svg>
+                      ) : (
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                          <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                      )}
+                    </button>
+                  </div>
+                  <small className="password-hint">Password must be at least 6 characters</small>
+                </div>
+
+                <div className="form-group">
+                  <label>Confirm Password</label>
+                  <div className="password-wrapper">
+                    <input
+                      type={showConfirmPassword ? "text" : "password"}
+                      name="confirmPassword"
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
+                      required
+                      placeholder="Confirm your password"
+                      className="password-input"
+                    />
+                    <button 
+                      type="button"
+                      className="eye-button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    >
+                      {showConfirmPassword ? (
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                          <circle cx="12" cy="12" r="3"></circle>
+                          <line x1="2" y1="2" x2="22" y2="22"></line>
+                        </svg>
+                      ) : (
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                          <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                <button type="submit" className="auth-btn" disabled={loading}>
+                  {loading ? 'Sending OTP...' : 'Sign Up with OTP'}
+                </button>
+              </form>
+
+              <p className="auth-link">
+                Already have an account? <Link to="/login">Login</Link>
+              </p>
+            </>
+          ) : (
+            <>
+              <h2>Verify OTP</h2>
+              <p>Enter the 6-digit code sent to <strong>{formData.email || 'your email'}</strong></p>
+
+              {error && <div className="error-message">{error}</div>}
+              {success && <div className="success-message">{success}</div>}
+
+              <form onSubmit={handleVerifyOTP}>
+                <div className="form-group">
+                  <label>OTP Code</label>
+                  <input
+                    type="text"
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                    placeholder="Enter 6-digit OTP"
+                    maxLength="6"
+                    required
+                    autoFocus
+                    style={{
+                      color: '#000',
+                      backgroundColor: '#fff',
+                      fontSize: '1.2rem',
+                      fontWeight: 'bold',
+                      textAlign: 'center',
+                      letterSpacing: '4px'
+                    }}
+                  />
+                </div>
+
+                <button type="submit" className="auth-btn" disabled={loading}>
+                  {loading ? 'Verifying...' : 'Verify & Create Account'}
+                </button>
+
+                <div className="otp-actions">
+                  <button 
+                    type="button" 
+                    className={`resend-btn ${resendTimer > 0 ? 'disabled' : ''}`}
+                    onClick={handleResendOTP}
+                    disabled={resendTimer > 0}
+                  >
+                    {resendTimer > 0 ? `Resend in ${resendTimer}s` : 'Resend OTP'}
+                  </button>
+                  <button 
+                    type="button" 
+                    className="back-btn"
+                    onClick={() => {
+                      setStep(1);
+                      setOtp('');
+                      setError('');
+                      setSuccess('');
+                      setLoading(false);
+                      if (window._resendTimer) {
+                        clearInterval(window._resendTimer);
+                        window._resendTimer = null;
+                      }
+                      setResendTimer(0);
+                    }}
+                  >
+                    ← Back
+                  </button>
+                </div>
+              </form>
+
+              <p className="auth-link">
+                Already have an account? <Link to="/login">Login</Link>
+              </p>
+            </>
+          )
+        ) : (
+          // BACKEND SIGNUP SECTION (NEW)
           <>
             <h2>Create Account</h2>
             <p>Join Foodies today!</p>
@@ -240,7 +541,7 @@ const Signup = () => {
             {error && <div className="error-message">{error}</div>}
             {success && <div className="success-message">{success}</div>}
 
-            <form onSubmit={handleSendOTP}>
+            <form onSubmit={handleBackendSignup}>
               <div className="form-group">
                 <label>Full Name</label>
                 <input
@@ -356,77 +657,14 @@ const Signup = () => {
               </div>
 
               <button type="submit" className="auth-btn" disabled={loading}>
-                {loading ? 'Sending OTP...' : 'Sign Up with OTP'}
+                {loading ? 'Creating account...' : 'Sign Up'}
               </button>
             </form>
 
-            <p className="auth-link">
-              Already have an account? <Link to="/login">Login</Link>
-            </p>
-          </>
-        ) : (
-          <>
-            <h2>Verify OTP</h2>
-            <p>Enter the 6-digit code sent to <strong>{formData.email || 'your email'}</strong></p>
-
-            {error && <div className="error-message">{error}</div>}
-            {success && <div className="success-message">{success}</div>}
-
-            <form onSubmit={handleVerifyOTP}>
-              <div className="form-group">
-                <label>OTP Code</label>
-                <input
-                  type="text"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                  placeholder="Enter 6-digit OTP"
-                  maxLength="6"
-                  required
-                  autoFocus
-                  style={{
-                    color: '#000',
-                    backgroundColor: '#fff',
-                    fontSize: '1.2rem',
-                    fontWeight: 'bold',
-                    textAlign: 'center',
-                    letterSpacing: '4px'
-                  }}
-                />
-              </div>
-
-              <button type="submit" className="auth-btn" disabled={loading}>
-                {loading ? 'Verifying...' : 'Verify & Create Account'}
-              </button>
-
-              <div className="otp-actions">
-                <button 
-                  type="button" 
-                  className={`resend-btn ${resendTimer > 0 ? 'disabled' : ''}`}
-                  onClick={handleResendOTP}
-                  disabled={resendTimer > 0}
-                >
-                  {resendTimer > 0 ? `Resend in ${resendTimer}s` : 'Resend OTP'}
-                </button>
-                <button 
-                  type="button" 
-                  className="back-btn"
-                  onClick={() => {
-                    setStep(1);
-                    setOtp('');
-                    setError('');
-                    setSuccess('');
-                    setLoading(false);
-                    if (window._resendTimer) {
-                      clearInterval(window._resendTimer);
-                      window._resendTimer = null;
-                    }
-                    setResendTimer(0);
-                  }}
-                >
-                  ← Back
-                </button>
-              </div>
-            </form>
+            <div className="demo-info">
+              <p><strong>✨ Backend Signup:</strong></p>
+              <p>⚠️ Make sure backend is running on port 5000</p>
+            </div>
 
             <p className="auth-link">
               Already have an account? <Link to="/login">Login</Link>

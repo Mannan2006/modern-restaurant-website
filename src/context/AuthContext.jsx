@@ -12,75 +12,92 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     // Check if user is logged in from localStorage
+    const token = localStorage.getItem('token');
     const storedUser = localStorage.getItem('user');
-    if (storedUser && storedUser !== 'undefined' && storedUser !== 'null') {
+    
+    if (token && storedUser && storedUser !== 'undefined' && storedUser !== 'null') {
       try {
         const parsedUser = JSON.parse(storedUser);
         setUser(parsedUser);
         setIsAuthenticated(true);
       } catch (e) {
         console.error('Failed to parse user:', e);
+        localStorage.removeItem('token');
         localStorage.removeItem('user');
       }
     }
     setLoading(false);
   }, []);
 
-  const signup = (userData) => {
-    const newUser = {
-      id: Date.now(),
-      ...userData,
-      joinedDate: new Date().toISOString()
-    };
-    setUser(newUser);
-    setIsAuthenticated(true);
-    localStorage.setItem('user', JSON.stringify(newUser));
-    return true;
-  };
-
-  const login = (email, password) => {
-    // Check in users array (for existing users)
-    const users = JSON.parse(localStorage.getItem('users') || '[]');
-    const existingUser = users.find(u => u.email === email && u.password === password);
-    
-    if (existingUser) {
-      setUser(existingUser);
-      setIsAuthenticated(true);
-      localStorage.setItem('user', JSON.stringify(existingUser));
-      return true;
-    }
-    
-    // Fallback to single user check
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      const user = JSON.parse(storedUser);
-      if (user.email === email && user.password === password) {
-        setUser(user);
+  // BACKEND SIGNUP
+  const signup = async (userData) => {
+    try {
+      const response = await fetch('http://localhost:5000/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userData)
+      });
+      
+      const data = await response.json();
+      console.log('Signup response:', data);
+      
+      if (response.ok && data.success) {
+        setUser(data.user);
         setIsAuthenticated(true);
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
         return true;
       }
+      console.error('Signup failed:', data.message);
+      return false;
+    } catch (err) {
+      console.error('Signup error:', err);
+      return false;
     }
-    return false;
   };
 
-  // OTP LOGIN - NEW FUNCTION
+  // BACKEND LOGIN
+  const login = async (email, password) => {
+    try {
+      const response = await fetch('http://localhost:5000/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      
+      const data = await response.json();
+      console.log('Login response:', data);
+      
+      if (response.ok && data.success) {
+        setUser(data.user);
+        setIsAuthenticated(true);
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        return true;
+      }
+      console.error('Login failed:', data.message);
+      return false;
+    } catch (err) {
+      console.error('Login error:', err);
+      return false;
+    }
+  };
+
+  // OTP LOGIN - Keep existing functionality
   const otpLogin = (mobileNumber, userData = null) => {
     console.log('otpLogin called with:', mobileNumber, userData);
     
     let userToSet;
     
     if (userData) {
-      // User data passed from Auth.jsx
       userToSet = userData;
     } else {
-      // Check if user exists with this phone number
       const users = JSON.parse(localStorage.getItem('users') || '[]');
       let existingUser = users.find(u => u.phone === mobileNumber);
       
       if (existingUser) {
         userToSet = existingUser;
       } else {
-        // Create new user for OTP login
         userToSet = {
           id: Date.now(),
           phone: mobileNumber,
@@ -89,13 +106,11 @@ export const AuthProvider = ({ children }) => {
           joinedDate: new Date().toISOString()
         };
         
-        // Save to users list
         const updatedUsers = [...users, userToSet];
         localStorage.setItem('users', JSON.stringify(updatedUsers));
       }
     }
     
-    // Set user in state and localStorage
     setUser(userToSet);
     setIsAuthenticated(true);
     localStorage.setItem('user', JSON.stringify(userToSet));
@@ -109,16 +124,39 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     setUser(null);
     setIsAuthenticated(false);
+    localStorage.removeItem('token');
     localStorage.removeItem('user');
   };
 
-  const updateProfile = (updatedData) => {
+  const updateProfile = async (updatedData) => {
+    // Try backend update first
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:5000/api/auth/me', {
+        method: 'PUT',
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-auth-token': token
+        },
+        body: JSON.stringify(updatedData)
+      });
+      
+      if (response.ok) {
+        const updatedUser = { ...user, ...updatedData };
+        setUser(updatedUser);
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        return true;
+      }
+    } catch (err) {
+      console.error('Profile update error:', err);
+    }
+    
+    // Fallback to localStorage update
     const updatedUser = { ...user, ...updatedData };
     setUser(updatedUser);
     setIsAuthenticated(true);
     localStorage.setItem('user', JSON.stringify(updatedUser));
     
-    // Also update in users array
     const users = JSON.parse(localStorage.getItem('users') || '[]');
     const userIndex = users.findIndex(u => u.id === updatedUser.id);
     if (userIndex !== -1) {
@@ -134,7 +172,7 @@ export const AuthProvider = ({ children }) => {
     loading,
     signup,
     login,
-    otpLogin,  // ADD THIS
+    otpLogin,
     logout,
     updateProfile
   };

@@ -2,36 +2,33 @@
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 
-const generateToken = (userId) => {
-  return jwt.sign(
-    { id: userId },
-    process.env.JWT_SECRET,
-    { expiresIn: '7d' }
-  );
+// Generate JWT Token
+const generateToken = (id) => {
+  return jwt.sign({ id }, process.env.JWT_SECRET, {
+    expiresIn: '30d',
+  });
 };
 
+// @desc    Register a new user
+// @route   POST /api/auth/signup
+// @access  Public
 exports.signup = async (req, res) => {
-  console.log('🔵 SIGNUP - Request received:', req.body.email);
+  console.log('📝 Signup request:', req.body.email);
   
   try {
     const { name, email, password, phone, address } = req.body;
-    
-    if (!email || !password) {
-      return res.status(400).json({ 
-        success: false,
-        message: 'Email and password are required' 
-      });
-    }
 
-    let user = await User.findOne({ email });
-    if (user) {
+    // Check if user exists
+    const userExists = await User.findOne({ email });
+    if (userExists) {
       return res.status(400).json({ 
         success: false,
         message: 'User already exists' 
       });
     }
 
-    user = new User({
+    // Create user
+    const user = await User.create({
       name,
       email,
       password,
@@ -39,14 +36,12 @@ exports.signup = async (req, res) => {
       address: address || ''
     });
 
-    await user.save();
-    console.log('✅ User saved successfully! ID:', user._id);
-
+    // Generate token
     const token = generateToken(user._id);
 
     res.status(201).json({
       success: true,
-      token: token,
+      token,
       user: {
         id: user._id,
         name: user.name,
@@ -55,69 +50,78 @@ exports.signup = async (req, res) => {
         address: user.address
       }
     });
-  } catch (err) {
-    console.error('🔴 SIGNUP ERROR:', err.message);
+  } catch (error) {
+    console.error('Signup error:', error);
     res.status(500).json({ 
       success: false,
-      message: 'Server error', 
-      error: err.message 
+      message: 'Server error',
+      error: error.message 
     });
   }
 };
 
+// @desc    Login user
+// @route   POST /api/auth/login
+// @access  Public
 exports.login = async (req, res) => {
-  console.log('🔵 LOGIN - Request received for:', req.body.email);
+  console.log('🔐 Login request:', req.body.email);
   
   try {
     const { email, password } = req.body;
 
+    // Check if user exists
     const user = await User.findOne({ email });
     if (!user) {
-      console.log('🔴 User not found:', email);
-      return res.status(400).json({ 
+      return res.status(401).json({ 
         success: false,
-        message: 'Invalid credentials' 
+        message: 'Invalid email or password' 
       });
     }
 
-    const isMatch = await user.comparePassword(password);
-    if (!isMatch) {
-      console.log('🔴 Invalid password for:', email);
-      return res.status(400).json({ 
+    // Check password
+    const isPasswordMatch = await user.comparePassword(password);
+    if (!isPasswordMatch) {
+      return res.status(401).json({ 
         success: false,
-        message: 'Invalid credentials' 
+        message: 'Invalid email or password' 
       });
     }
 
-    console.log('✅ Login successful for:', email);
+    // Generate token
     const token = generateToken(user._id);
+
+    console.log('✅ Login successful for:', user.email);
 
     res.json({
       success: true,
-      token: token,
+      token,
       user: {
         id: user._id,
         name: user.name,
         email: user.email,
-        phone: user.phone || '',
-        address: user.address || ''
+        phone: user.phone,
+        address: user.address
       }
     });
-  } catch (err) {
-    console.error('🔴 LOGIN ERROR:', err.message);
+  } catch (error) {
+    console.error('Login error:', error);
     res.status(500).json({ 
       success: false,
-      message: 'Server error' 
+      message: 'Server error',
+      error: error.message 
     });
   }
 };
 
+// @desc    Get current user profile
+// @route   GET /api/auth/me
+// @access  Private
 exports.getMe = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select('-password');
     res.json(user);
-  } catch (err) {
-    console.error(err.message);
+  } catch (error) {
+    console.error('Get me error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };

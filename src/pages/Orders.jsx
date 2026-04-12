@@ -6,6 +6,7 @@ import './Orders.css';
 
 const Orders = () => {
   const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
   const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
@@ -15,10 +16,52 @@ const Orders = () => {
       return;
     }
 
-    // Load orders from localStorage
-    const savedOrders = JSON.parse(localStorage.getItem('orders') || '[]');
-    setOrders(savedOrders);
-  }, [isAuthenticated, navigate]);
+    // Fetch orders from backend API
+    const fetchOrders = async () => {
+      setLoading(true);
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('http://localhost:5000/api/orders', {
+          headers: {
+            'x-auth-token': token
+          }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          // Transform backend orders to match existing format
+          const formattedOrders = data.map(order => ({
+            id: order._id,
+            items: order.items,
+            subtotal: order.subtotal,
+            deliveryFee: order.deliveryFee,
+            total: order.total,
+            paymentMethod: order.paymentMethod,
+            status: order.status || 'Confirmed',
+            date: order.createdAt,
+            customer: {
+              address: user?.address || 'Address not specified'
+            }
+          }));
+          setOrders(formattedOrders);
+        } else if (response.status === 401) {
+          // Token expired or invalid
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          navigate('/login');
+        }
+      } catch (err) {
+        console.error('Error fetching orders:', err);
+        // Fallback to localStorage if backend is not available
+        const savedOrders = JSON.parse(localStorage.getItem('orders') || '[]');
+        setOrders(savedOrders);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrders();
+  }, [isAuthenticated, navigate, user?.address]);
 
   const getStatusColor = (status) => {
     switch(status) {
@@ -26,6 +69,9 @@ const Orders = () => {
       case 'Preparing': return '#ff9800';
       case 'Out for Delivery': return '#2196f3';
       case 'Delivered': return '#9c27b0';
+      case 'pending': return '#ff9800';
+      case 'confirmed': return '#4caf50';
+      case 'cancelled': return '#f44336';
       default: return '#666';
     }
   };
@@ -40,8 +86,35 @@ const Orders = () => {
     }
   };
 
+  // Format date for display
+  const formatDate = (dateString) => {
+    if (!dateString) return 'Date not available';
+    try {
+      return new Date(dateString).toLocaleDateString('en-IN', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch (e) {
+      return 'Date not available';
+    }
+  };
+
   if (!isAuthenticated) {
     return null;
+  }
+
+  if (loading) {
+    return (
+      <div className="orders-container empty-orders">
+        <div className="empty-orders-content">
+          <div className="spinner"></div>
+          <p>Loading your orders...</p>
+        </div>
+      </div>
+    );
   }
 
   if (orders.length === 0) {
@@ -70,20 +143,17 @@ const Orders = () => {
               <div className="order-info">
                 <span className="order-id">Order #{order.id.toString().slice(-8)}</span>
                 <span className="order-date">
-                  {new Date(order.date).toLocaleDateString('en-IN', {
-                    day: 'numeric',
-                    month: 'short',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                  })}
+                  {formatDate(order.date)}
                 </span>
               </div>
               <div 
                 className="order-status"
                 style={{ backgroundColor: getStatusColor(order.status) }}
               >
-                {order.status}
+                {order.status === 'pending' ? 'Confirmed' : 
+                 order.status === 'confirmed' ? 'Confirmed' : 
+                 order.status === 'cancelled' ? 'Cancelled' : 
+                 order.status || 'Confirmed'}
               </div>
             </div>
             
@@ -107,7 +177,7 @@ const Orders = () => {
               
               <div className="order-delivery">
                 <span>Delivery Address:</span>
-                <span className="delivery-address">{order.customer?.address || 'Address not specified'}</span>
+                <span className="delivery-address">{order.customer?.address || user?.address || 'Address not specified'}</span>
               </div>
               
               <div className="order-total">

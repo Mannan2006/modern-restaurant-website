@@ -13,6 +13,32 @@
   margin-bottom: 2rem;
 }
 
+/* Add to your Cart.css file */
+
+.item-image {
+  width: 80px;
+  height: 80px;
+  border-radius: 12px;
+  overflow: hidden;
+  background-color: #f3f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.cart-item-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* If images don't load, show a nice fallback */
+.item-image:has(img[style*="display: none"]) {
+  font-size: 40px;
+  background-color: #fef3c7;
+}
+
 .cart-title {
   font-size: 2.5rem;
   background: linear-gradient(135deg, #FF6B35 0%, #FF8A5C 100%);
