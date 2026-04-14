@@ -266,7 +266,7 @@
 .bank-select {
   width: 100%;
   padding: 0.8rem;
-  border: 1px solid #e0e0e0;
+  border: 1px solid #000000;
   border-radius: 8px;
   font-size: 1rem;
   transition: all 0.3s;
@@ -281,8 +281,8 @@
 
 .bank-select {
   cursor: pointer;
-  background: white;
-}
+  background: rgb(213, 198, 198);
+}  
 
 .delivery-address-review {
   background: white;
