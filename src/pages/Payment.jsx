@@ -63,7 +63,7 @@ const handlePlaceOrder = async () => {
 
     // ✅ UPDATE EXISTING ORDER
     if (orderId) {
-      const response = await fetch(`http://localhost:5000/api/orders/${orderId}`, {
+      const response = await fetch(`https://modern-restaurant-website.onrender.com/api/orders/${orderId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
