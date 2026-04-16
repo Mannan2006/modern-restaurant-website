@@ -48,11 +48,12 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/orders', require('./routes/orders'));
 app.use('/api/menu', require('./routes/menu')); // Add menu routes
 
-// Test route
-app.get('/api/test', (req, res) => {
-  res.json({ message: 'Backend is working!' });
-});
 
+// Test route
+// ✅ ADD HERE
+app.get('/', (req, res) => {
+  res.send('🚀 Backend is LIVE on Render!');
+});
 // ADD THIS: Test route to check users in database
 app.get('/api/check-users', async (req, res) => {
   try {
