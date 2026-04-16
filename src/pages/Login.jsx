@@ -18,7 +18,7 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [tempUser, setTempUser] = useState(null);
   const [resendTimer, setResendTimer] = useState(0);
-  const [loginMethod, setLoginMethod] = useState('otp'); // 'otp' or 'backend'
+ const [loginMethod, setLoginMethod] = useState('backend');
 
   const navigate = useNavigate();
   const { otpLogin, login: backendLogin } = useAuth();
