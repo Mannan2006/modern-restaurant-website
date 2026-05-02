@@ -3,12 +3,17 @@ const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 
 // Generate JWT Token
-const generateToken = (id) => {
+const generateAccessToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: '30d',
+    expiresIn: '15m', // short life
   });
 };
 
+const generateRefreshToken = (id) => {
+  return jwt.sign({ id }, process.env.JWT_REFRESH_SECRET, {
+    expiresIn: '7d', // long life
+  });
+};
 // @desc    Register a new user
 // @route   POST /api/auth/signup
 // @access  Public
@@ -36,12 +41,14 @@ exports.signup = async (req, res) => {
       address: address || ''
     });
 
-    // Generate token
-    const token = generateToken(user._id);
+    // Generate tokens
+    const accessToken = generateAccessToken(user._id);
+const refreshToken = generateRefreshToken(user._id);
 
     res.status(201).json({
-      success: true,
-      token,
+  success: true,
+  accessToken,
+  refreshToken,
       user: {
         id: user._id,
         name: user.name,
@@ -124,4 +131,23 @@ exports.getMe = async (req, res) => {
     console.error('Get me error:', error);
     res.status(500).json({ message: 'Server error' });
   }
+};
+
+// @desc    Refresh access token
+// @route   POST /api/auth/refresh
+// @access  Public
+exports.refreshToken = async (req, res) => {
+  const { refreshToken } = req.body;
+
+  if (!refreshToken) {
+    return res.status(401).json({ message: "No refresh token" });
+  }
+
+  jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET, (err, user) => {
+    if (err) return res.status(403).json({ message: "Invalid refresh token" });
+
+    const newAccessToken = generateAccessToken(user.id);
+
+    res.json({ accessToken: newAccessToken });
+  });
 };

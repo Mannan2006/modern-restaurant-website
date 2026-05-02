@@ -10,24 +10,18 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  useEffect(() => {
-    // Check if user is logged in from localStorage
-    const token = localStorage.getItem('token');
-    const storedUser = localStorage.getItem('user');
-    
-    if (token && storedUser && storedUser !== 'undefined' && storedUser !== 'null') {
-      try {
-        const parsedUser = JSON.parse(storedUser);
-        setUser(parsedUser);
-        setIsAuthenticated(true);
-      } catch (e) {
-        console.error('Failed to parse user:', e);
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-      }
-    }
-    setLoading(false);
-  }, []);
+// In AuthContext.jsx, add this useEffect
+useEffect(() => {
+  // Load user from localStorage when app starts/refreshes
+  const savedUser = localStorage.getItem('user');
+  const token = localStorage.getItem('token');
+  
+  console.log('🔍 AuthContext init - user:', savedUser, 'token:', !!token);
+  
+  if (savedUser && token) {
+    setUser(JSON.parse(savedUser));
+  }
+}, []); // Empty array = runs once when app loads // Empty array = runs once on app start
 
   // BACKEND SIGNUP
   const signup = async (userData) => {
@@ -134,10 +128,10 @@ export const AuthProvider = ({ children }) => {
       const token = localStorage.getItem('token');
       const response = await fetch('http://localhost:5000/api/auth/me', {
         method: 'PUT',
-        headers: { 
-          'Content-Type': 'application/json',
-          'x-auth-token': token
-        },
+headers: {
+  'Content-Type': 'application/json',
+  'Authorization': `Bearer ${token}`   // ✅ This is correct
+},
         body: JSON.stringify(updatedData)
       });
       
