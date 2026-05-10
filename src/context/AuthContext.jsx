@@ -53,7 +53,7 @@ useEffect(() => {
   // BACKEND LOGIN
   const login = async (email, password) => {
     try {
-      const response = await fetch('http://localhost:5000/api/auth/login', {
+      const response = await fetch('https://modern-restaurant-website.onrender.com/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
@@ -126,7 +126,7 @@ useEffect(() => {
     // Try backend update first
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/auth/me', {
+      const response = await fetch('https://modern-restaurant-website.onrender.com/api/auth/me', {
         method: 'PUT',
 headers: {
   'Content-Type': 'application/json',
