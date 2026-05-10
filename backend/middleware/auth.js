@@ -1,23 +1,41 @@
+// backend/middleware/auth.js
 const jwt = require('jsonwebtoken');
 
 module.exports = function (req, res, next) {
   // Get token from header
   const authHeader = req.header('Authorization');
-  let token = authHeader && authHeader.startsWith('Bearer') 
-              ? authHeader.split(' ')[1] 
-              : req.header('x-auth-token');
-
+  let token = null;
+  
+  // Check for Bearer token (standard)
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    token = authHeader.split(' ')[1];
+  }
+  
+  // Also check x-auth-token (fallback)
   if (!token) {
-    return res.status(401).json({ message: 'No token, authorization denied' });
+    token = req.header('x-auth-token');
+  }
+
+  console.log('🔐 Auth middleware - Token received:', token ? 'YES' : 'NO');
+  
+  if (!token) {
+    return res.status(401).json({ 
+      success: false, 
+      message: 'Access denied. No token provided.' 
+    });
   }
 
   try {
-    // ✅ IMPORTANT: Use the SAME JWT_SECRET as login
+    // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log('✅ Token verified for user ID:', decoded.id);
     req.user = decoded;
     next();
   } catch (err) {
-    console.error('Token verification failed:', err.message);
-    return res.status(403).json({ message: 'Token is not valid' });
+    console.error('❌ Token verification failed:', err.message);
+    return res.status(403).json({ 
+      success: false, 
+      message: 'Invalid or expired token.' 
+    });
   }
 };

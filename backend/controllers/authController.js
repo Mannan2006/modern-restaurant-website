@@ -1,18 +1,15 @@
-// backend/controllers/authController.js
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 
-// Generate JWT Tokens
+// Generate JWT Tokens - NO EXPIRATION
 const generateAccessToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: '15m', // short life
-  });
+  return jwt.sign({ id }, process.env.JWT_SECRET);
+  // Token never expires
 };
 
 const generateRefreshToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_REFRESH_SECRET, {
-    expiresIn: '7d', // long life
-  });
+  return jwt.sign({ id }, process.env.JWT_REFRESH_SECRET);
+  // Token never expires
 };
 
 // @desc    Register a new user
@@ -24,7 +21,6 @@ exports.signup = async (req, res) => {
   try {
     const { name, email, password, phone, address } = req.body;
 
-    // Check if user exists
     const userExists = await User.findOne({ email });
     if (userExists) {
       return res.status(400).json({ 
@@ -33,7 +29,6 @@ exports.signup = async (req, res) => {
       });
     }
 
-    // Create user
     const user = await User.create({
       name,
       email,
@@ -42,7 +37,6 @@ exports.signup = async (req, res) => {
       address: address || ''
     });
 
-    // Generate tokens
     const accessToken = generateAccessToken(user._id);
     const refreshToken = generateRefreshToken(user._id);
 
@@ -77,7 +71,6 @@ exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Check if user exists
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(401).json({ 
@@ -86,7 +79,6 @@ exports.login = async (req, res) => {
       });
     }
 
-    // Check password
     const isPasswordMatch = await user.comparePassword(password);
     if (!isPasswordMatch) {
       return res.status(401).json({ 
@@ -95,7 +87,7 @@ exports.login = async (req, res) => {
       });
     }
 
-    // ✅ FIXED: Generate BOTH access and refresh tokens
+    // Generate tokens - NEVER EXPIRE
     const accessToken = generateAccessToken(user._id);
     const refreshToken = generateRefreshToken(user._id);
 

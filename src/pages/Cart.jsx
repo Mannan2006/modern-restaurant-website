@@ -52,14 +52,14 @@ const Cart = () => {
       }
       
       // ✅ FIXED: Use Authorization Bearer header
-      const response = await fetch('https://modern-restaurant-website.onrender.com/api/orders', {
-        method: 'POST',
-        headers: {
-  'Content-Type': 'application/json',
-  'x-auth-token': token
-        },
-        body: JSON.stringify(orderData)
-      });
+const response = await fetch('https://modern-restaurant-website.onrender.com/api/orders', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${localStorage.getItem('token')}`  // ✅ Must be this format
+  },
+  body: JSON.stringify(orderData)
+});
       
       console.log('🟢 Response status:', response.status);
       

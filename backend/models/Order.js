@@ -1,4 +1,3 @@
-// backend/models/Order.js
 const mongoose = require('mongoose');
 
 const orderSchema = new mongoose.Schema({
@@ -7,57 +6,25 @@ const orderSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
-  items: [
-    {
-      id: {
-        type: String,
-        required: true
-      },
-      name: {
-        type: String,
-        required: true
-      },
-      price: {
-        type: Number,
-        required: true
-      },
-      quantity: {
-        type: Number,
-        required: true,
-        min: 1
-      },
-      image: {
-        type: String,
-        default: ''
-      }
-    }
-  ],
-  subtotal: {
-    type: Number,
-    required: true
-  },
-  deliveryFee: {
-    type: Number,
-    required: true,
-    default: 40
-  },
-  total: {
-    type: Number,
-    required: true
-  },
+  items: [{
+    id: String,
+    name: String,
+    price: Number,
+    quantity: Number,
+    image: String
+  }],
+  subtotal: Number,
+  deliveryFee: Number,
+  total: Number,
   status: {
     type: String,
     enum: ['pending', 'confirmed', 'preparing', 'out_for_delivery', 'delivered', 'cancelled'],
     default: 'pending'
   },
-  paymentStatus: {
+  paymentMethod: {
     type: String,
-    enum: ['pending', 'paid', 'failed'],
-    default: 'pending'
-  },
-  address: {
-    type: String,
-    default: ''
+    enum: ['cod', 'qr', 'card', 'netbanking'],
+    default: 'cod'
   },
   createdAt: {
     type: Date,
