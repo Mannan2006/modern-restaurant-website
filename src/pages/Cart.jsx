@@ -55,8 +55,8 @@ const Cart = () => {
       const response = await fetch('https://modern-restaurant-website.onrender.com/api/orders', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+  'Content-Type': 'application/json',
+  'x-auth-token': token
         },
         body: JSON.stringify(orderData)
       });

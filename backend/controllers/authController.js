@@ -2,7 +2,7 @@
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 
-// Generate JWT Token
+// Generate JWT Tokens
 const generateAccessToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: '15m', // short life
@@ -14,6 +14,7 @@ const generateRefreshToken = (id) => {
     expiresIn: '7d', // long life
   });
 };
+
 // @desc    Register a new user
 // @route   POST /api/auth/signup
 // @access  Public
@@ -43,12 +44,12 @@ exports.signup = async (req, res) => {
 
     // Generate tokens
     const accessToken = generateAccessToken(user._id);
-const refreshToken = generateRefreshToken(user._id);
+    const refreshToken = generateRefreshToken(user._id);
 
     res.status(201).json({
-  success: true,
-  accessToken,
-  refreshToken,
+      success: true,
+      accessToken,
+      refreshToken,
       user: {
         id: user._id,
         name: user.name,
@@ -94,14 +95,16 @@ exports.login = async (req, res) => {
       });
     }
 
-    // Generate token
-    const token = generateToken(user._id);
+    // ✅ FIXED: Generate BOTH access and refresh tokens
+    const accessToken = generateAccessToken(user._id);
+    const refreshToken = generateRefreshToken(user._id);
 
     console.log('✅ Login successful for:', user.email);
 
     res.json({
       success: true,
-      token,
+      accessToken,
+      refreshToken,
       user: {
         id: user._id,
         name: user.name,
