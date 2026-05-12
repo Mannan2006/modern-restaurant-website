@@ -88,6 +88,12 @@ const handleBackendLogin = async (e) => {
       if (token) {
         localStorage.setItem('token', token);
         localStorage.setItem('user', JSON.stringify(user));
+        
+        // ✅ CRITICAL FIX: Update AuthContext state directly
+        if (backendLogin) {
+          await backendLogin(email, password);
+        }
+        
         console.log('✅ Login successful');
         setSuccess('Login successful! Redirecting...');
         setTimeout(() => navigate('/menu'), 500);

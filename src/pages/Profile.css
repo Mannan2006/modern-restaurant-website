@@ -65,6 +65,37 @@
   border-bottom: 2px solid #f0f0f0;
 }
 
+/* ✅ FIX: Make address input text visible */
+.info-group input,
+.info-group textarea,
+.profile-edit-form input,
+.profile-edit-form textarea {
+  color: #333 !important;
+  font-size: 1rem;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  width: 100%;
+  background: white;
+}
+
+.info-group input:focus,
+.info-group textarea:focus,
+.profile-edit-form input:focus,
+.profile-edit-form textarea:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+}
+
+/* Specifically for address field */
+input[name="address"],
+textarea[name="address"],
+#address {
+  color: #333 !important;
+  background: white !important;
+}
+
 .profile-actions {
   display: flex;
   gap: 1rem;

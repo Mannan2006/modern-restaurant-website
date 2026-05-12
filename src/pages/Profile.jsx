@@ -23,14 +23,28 @@ const Profile = () => {
     const fetchUserData = async () => {
       try {
         const token = localStorage.getItem('token');
+        
+        if (!token) {
+          console.log('No token found');
+          return;
+        }
+        
+        console.log('Fetching user data with token:', token.substring(0, 30) + '...');
+        
+        // ✅ FIX: Use Authorization: Bearer header
         const response = await fetch('https://modern-restaurant-website.onrender.com/api/auth/me', {
+          method: 'GET',
           headers: {
-            'x-auth-token': token
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
           }
         });
         
+        console.log('Fetch user data response status:', response.status);
+        
         if (response.ok) {
           const userData = await response.json();
+          console.log('User data received:', userData);
           setFormData({
             name: userData.name || '',
             email: userData.email || '',
@@ -38,7 +52,14 @@ const Profile = () => {
             address: userData.address || ''
           });
           // Update AuthContext with latest data
-          updateProfile(userData);
+          if (updateProfile) {
+            updateProfile(userData);
+          }
+        } else if (response.status === 401 || response.status === 403) {
+          console.log('Token invalid, redirecting to login');
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          navigate('/login');
         }
       } catch (err) {
         console.error('Error fetching user data:', err);
@@ -48,7 +69,7 @@ const Profile = () => {
     if (user) {
       fetchUserData();
     }
-  }, [user, updateProfile]);
+  }, [user, updateProfile, navigate]);
 
   if (!user) {
     navigate('/login');
@@ -70,11 +91,21 @@ const Profile = () => {
     
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('https://modern-restaurant-website.onrender.com/api/auth/me', {
+      
+      if (!token) {
+        setError('Session expired. Please login again.');
+        navigate('/login');
+        return;
+      }
+      
+      console.log('Updating profile with token:', token.substring(0, 30) + '...');
+      
+      // ✅ FIX: Use correct endpoint and Authorization header
+      const response = await fetch('https://modern-restaurant-website.onrender.com/api/auth/profile', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'x-auth-token': token
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
           name: formData.name,
@@ -83,20 +114,29 @@ const Profile = () => {
         })
       });
       
+      console.log('Update profile response status:', response.status);
+      const data = await response.json();
+      console.log('Update profile response data:', data);
+      
       if (response.ok) {
-        const updatedUser = await response.json();
+        // Update localStorage with new user data
+        const updatedUser = data.user || data;
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        
         // Update AuthContext with updated data
-        updateProfile(updatedUser);
+        if (updateProfile) {
+          updateProfile(updatedUser);
+        }
+        
         setSuccess('Profile updated successfully!');
         setIsEditing(false);
         setTimeout(() => setSuccess(''), 3000);
       } else {
-        const data = await response.json();
         setError(data.message || 'Failed to update profile');
       }
     } catch (err) {
       console.error('Error updating profile:', err);
-      setError('Cannot connect to server. Please make sure backend is running on port 5000');
+      setError('Cannot connect to server. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -187,8 +227,7 @@ const Profile = () => {
                 name="phone"
                 value={formData.phone}
                 onChange={handleChange}
-                required
-                maxLength="10"
+                placeholder="Enter your phone number"
               />
             </div>
             
@@ -198,7 +237,7 @@ const Profile = () => {
                 name="address"
                 value={formData.address}
                 onChange={handleChange}
-                required
+                placeholder="Enter your delivery address"
                 rows="3"
               />
             </div>
