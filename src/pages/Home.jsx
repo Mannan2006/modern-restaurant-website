@@ -256,7 +256,9 @@ const Home = () => {
       <footer className="footer">
         <div className="footer-content">
           <div className="footer-section">
-            <h3>🍔 Foodies</h3>
+            <h3>     M E R I D I A N
+    — FINE  CUISINE —
+</h3>
             <p>Delivering happiness, one meal at a time.</p>
             <div className="social-links">
               <a href="#">📱</a>
