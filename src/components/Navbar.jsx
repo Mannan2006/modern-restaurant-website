@@ -35,8 +35,7 @@ const Navbar = () => {
     <nav className={`navbar-modern ${scrolled ? 'scrolled' : ''}`}>
       <div className="nav-container-modern">
         <Link to="/" className="nav-logo-modern" onClick={() => setMobileMenuOpen(false)}>
-          <span className="logo-icon">🍔</span>
-          <span className="logo-text">Foodies</span>
+          <span className="logo-text">MERIDIAN</span>
         </Link>
 
         <div className={`nav-menu-modern ${mobileMenuOpen ? 'active' : ''}`}>

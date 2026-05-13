@@ -256,7 +256,7 @@ const Home = () => {
       <footer className="footer">
         <div className="footer-content">
           <div className="footer-section">
-            <h3>     M E R I D I A N
+            <h3>     MERIDIAN
     — FINE  CUISINE —
 </h3>
             <p>Delivering happiness, one meal at a time.</p>
@@ -293,7 +293,7 @@ const Home = () => {
           </div>
         </div>
         <div className="footer-bottom">
-          <p>© 2026 Foodies. All rights reserved. | Designed with ❤️ for food lovers</p>
+          <p>© 2026 MERIDIAN. All rights reserved. | Designed with ❤️ for food lovers</p>
         </div>
       </footer>
     </div>
