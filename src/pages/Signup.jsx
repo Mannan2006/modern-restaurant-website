@@ -46,73 +46,57 @@ const Signup = () => {
     return password.length >= 6;
   };
 
-  // BACKEND SIGNUP (NEW)
-  const handleBackendSignup = async (e) => {
-    e.preventDefault();
-    setError('');
-    setSuccess('');
-    setLoading(true);
+const handleBackendSignup = async (e) => {
+  e.preventDefault();
+  setError('');
+  setSuccess('');
+  setLoading(true);
 
-    const { name, email, password, confirmPassword, phone, address } = formData;
+  const { name, email, password, confirmPassword, phone, address } = formData;
 
-    if (!name.trim()) {
-      setError('Please enter your full name');
-      setLoading(false);
-      return;
+  // Validation checks...
+  if (!name.trim()) {
+    setError('Please enter your full name');
+    setLoading(false);
+    return;
+  }
+
+  if (!isValidEmail(email)) {
+    setError('Please enter a valid email address');
+    setLoading(false);
+    return;
+  }
+
+  if (!isValidPassword(password)) {
+    setError('Password must be at least 6 characters long');
+    setLoading(false);
+    return;
+  }
+
+  if (password !== confirmPassword) {
+    setError('Passwords do not match');
+    setLoading(false);
+    return;
+  }
+
+  try {
+    const result = await signup({ name, email, password, phone, address });
+    
+    if (result.success) {
+      setSuccess('Account created successfully! Redirecting to menu...');
+      setTimeout(() => {
+        navigate('/menu');
+      }, 1500);
+    } else {
+      setError(result.message || 'Signup failed. Please try again.');
     }
-
-    if (!isValidEmail(email)) {
-      setError('Please enter a valid email address');
-      setLoading(false);
-      return;
-    }
-
-    if (!isValidPassword(password)) {
-      setError('Password must be at least 6 characters long');
-      setLoading(false);
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setError('Passwords do not match');
-      setLoading(false);
-      return;
-    }
-
-    if (phone && phone.length !== 10) {
-      setError('Please enter a valid 10-digit phone number');
-      setLoading(false);
-      return;
-    }
-
-    try {
-      const response = await fetch('https://modern-restaurant-website.onrender.com/api/auth/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password, phone, address })
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
-        signup(data.user);
-        setSuccess('Account created successfully! Redirecting to menu...');
-        setTimeout(() => {
-          navigate('/menu');
-        }, 1500);
-      } else {
-        setError(data.message || 'Signup failed. Please try again.');
-      }
-    } catch (err) {
-      console.error('Signup error:', err);
-      setError('Cannot connect to server. Please make sure the backend is running on port 5000');
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  } catch (err) {
+    console.error('Signup error:', err);
+    setError('Cannot connect to server. Please try again.');
+  } finally {
+    setLoading(false);
+  }
+};
   // SEND OTP (EXISTING - UNCHANGED)
   const handleSendOTP = (e) => {
     e.preventDefault();

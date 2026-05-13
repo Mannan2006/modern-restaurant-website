@@ -7,9 +7,29 @@ import './Cart.css';
 
 const Cart = () => {
   const { cartItems, removeFromCart, updateQuantity, getCartTotal, clearCart } = useCart();
-  const { user } = useAuth();
+  const { user, loading } = useAuth();  // ✅ Added loading
   const navigate = useNavigate();
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
+
+  // ✅ Check authentication FIRST
+  const token = localStorage.getItem('token');
+  
+  // ✅ Show loading while checking auth
+  if (loading) {
+    return (
+      <div className="cart-container">
+        <div className="loading-spinner">
+          <p>Loading...</p>
+        </div>
+      </div>
+    );
+  }
+  
+  // ✅ Redirect to login if not authenticated
+  if (!token || !user) {
+    navigate('/login');
+    return null;
+  }
 
   const subtotal = getCartTotal();
   const deliveryFee = 40;
@@ -51,15 +71,14 @@ const Cart = () => {
         return;
       }
       
-      // ✅ FIXED: Use Authorization Bearer header
-const response = await fetch('https://modern-restaurant-website.onrender.com/api/orders', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${localStorage.getItem('token')}`  // ✅ Must be this format
-  },
-  body: JSON.stringify(orderData)
-});
+      const response = await fetch('https://modern-restaurant-website.onrender.com/api/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(orderData)
+      });
       
       console.log('🟢 Response status:', response.status);
       

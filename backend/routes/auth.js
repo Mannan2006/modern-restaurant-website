@@ -2,32 +2,35 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
-const auth = require('../middleware/auth'); // ✅ Import auth middleware
+const auth = require('../middleware/auth');
 
-// ✅ SIGNUP
+// ✅ SIGNUP - Fixed response format
 router.post('/signup', async (req, res) => {
   try {
     const { name, email, password, phone, address } = req.body;
+
+    console.log('📝 Signup attempt for:', email);
 
     // Check if user exists
     let existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({
         success: false,
-        message: "User already exists"
+        message: "User already exists with this email"
       });
     }
 
-    // Create user (password will be hashed automatically)
+    // Create user
     const newUser = new User({
       name,
       email,
       password,
-      phone,
-      address
+      phone: phone || '',
+      address: address || ''
     });
 
     await newUser.save();
+    console.log('✅ User created successfully:', email);
 
     // Generate token
     const token = jwt.sign(
@@ -36,7 +39,8 @@ router.post('/signup', async (req, res) => {
       { expiresIn: '7d' }
     );
 
-    res.json({
+    // Return user data (without password)
+    res.status(201).json({
       success: true,
       message: "User created successfully",
       token,
@@ -44,40 +48,44 @@ router.post('/signup', async (req, res) => {
         id: newUser._id,
         name: newUser.name,
         email: newUser.email,
-        phone: newUser.phone,
-        address: newUser.address
+        phone: newUser.phone || '',
+        address: newUser.address || '',
+        role: newUser.role,
+        joinedDate: newUser.createdAt
       }
     });
 
   } catch (err) {
+    console.error('❌ Signup error:', err);
     res.status(500).json({
       success: false,
-      message: err.message
+      message: err.message || "Server error during signup"
     });
   }
 });
 
-// ✅ LOGIN
+// ✅ LOGIN - Fixed response format
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    console.log('🔐 Login attempt for:', email);
+
     // Find user
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(400).json({
+      return res.status(401).json({
         success: false,
-        message: "User not found"
+        message: "User not found. Please sign up first."
       });
     }
 
-    // ✅ FIXED: bcrypt password check
+    // Check password
     const isMatch = await user.comparePassword(password);
-
     if (!isMatch) {
-      return res.status(400).json({
+      return res.status(401).json({
         success: false,
-        message: "Invalid password"
+        message: "Invalid password. Please try again."
       });
     }
 
@@ -88,27 +96,33 @@ router.post('/login', async (req, res) => {
       { expiresIn: '7d' }
     );
 
+    console.log('✅ Login successful for:', email);
+
     res.json({
       success: true,
+      message: "Login successful",
       token,
       user: {
         id: user._id,
         name: user.name,
         email: user.email,
-        phone: user.phone,
-        address: user.address
+        phone: user.phone || '',
+        address: user.address || '',
+        role: user.role,
+        joinedDate: user.createdAt
       }
     });
 
   } catch (err) {
+    console.error('❌ Login error:', err);
     res.status(500).json({
       success: false,
-      message: err.message
+      message: err.message || "Server error during login"
     });
   }
 });
 
-// ✅ GET CURRENT USER PROFILE
+// ✅ GET CURRENT USER
 router.get('/me', auth, async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select('-password');
@@ -118,8 +132,12 @@ router.get('/me', auth, async (req, res) => {
         message: "User not found"
       });
     }
-    res.json(user);
+    res.json({
+      success: true,
+      user
+    });
   } catch (err) {
+    console.error('❌ Get user error:', err);
     res.status(500).json({
       success: false,
       message: err.message
@@ -127,7 +145,7 @@ router.get('/me', auth, async (req, res) => {
   }
 });
 
-// ✅ UPDATE USER PROFILE (ADD THIS)
+// ✅ UPDATE USER PROFILE
 router.put('/me', auth, async (req, res) => {
   try {
     const { name, phone, address } = req.body;
@@ -135,11 +153,11 @@ router.put('/me', auth, async (req, res) => {
     const updatedUser = await User.findByIdAndUpdate(
       req.user.id,
       { 
-        name: name || req.user.name,
+        name: name,
         phone: phone || '',
         address: address || ''
       },
-      { new: true }  // Return the updated document
+      { new: true }
     ).select('-password');
     
     if (!updatedUser) {
@@ -149,7 +167,7 @@ router.put('/me', auth, async (req, res) => {
       });
     }
     
-    console.log('✅ Profile updated for user:', updatedUser.email);
+    console.log('✅ Profile updated for:', updatedUser.email);
     
     res.json({
       success: true,
@@ -157,7 +175,7 @@ router.put('/me', auth, async (req, res) => {
       user: updatedUser
     });
   } catch (err) {
-    console.error('Update profile error:', err);
+    console.error('❌ Update profile error:', err);
     res.status(500).json({
       success: false,
       message: err.message

@@ -54,55 +54,15 @@ const handleBackendLogin = async (e) => {
   }
 
   try {
-    const response = await fetch('https://modern-restaurant-website.onrender.com/api/auth/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email, password }),
-    });
-
-    // Log the raw response first
-    console.log('Response status:', response.status);
+    const result = await backendLogin(email, password);
     
-    // Try to get the response text first to debug
-    const responseText = await response.text();
-    console.log('Raw response:', responseText);
-    
-    // Try to parse as JSON
-    let data;
-    try {
-      data = JSON.parse(responseText);
-    } catch (e) {
-      console.error('Failed to parse JSON:', e);
-      setError('Server returned invalid response');
-      setLoading(false);
-      return;
-    }
-
-    if (response.ok) {
-      // Handle different possible response formats
-      const token = data.token || data.accessToken || data.jwt;
-      const user = data.user || data;
-      
-      if (token) {
-        localStorage.setItem('token', token);
-        localStorage.setItem('user', JSON.stringify(user));
-        
-        // ✅ CRITICAL FIX: Update AuthContext state directly
-        if (backendLogin) {
-          await backendLogin(email, password);
-        }
-        
-        console.log('✅ Login successful');
-        setSuccess('Login successful! Redirecting...');
-        setTimeout(() => navigate('/menu'), 500);
-      } else {
-        console.error('No token in response:', data);
-        setError('Invalid server response format');
-      }
+    if (result.success) {
+      setSuccess('Login successful! Redirecting...');
+      setTimeout(() => {
+        navigate('/menu');
+      }, 500);
     } else {
-      setError(data.message || data.error || `Login failed: ${response.status}`);
+      setError(result.message || 'Login failed');
     }
   } catch (err) {
     console.error('Login error:', err);

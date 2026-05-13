@@ -1,4 +1,4 @@
-// context/AuthContext.jsx
+// src/context/AuthContext.jsx
 import React, { createContext, useState, useContext, useEffect } from 'react';
 
 const AuthContext = createContext();
@@ -8,49 +8,28 @@ export const useAuth = () => useContext(AuthContext);
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-// In AuthContext.jsx, add this useEffect
-useEffect(() => {
-  // Load user from localStorage when app starts/refreshes
-  const savedUser = localStorage.getItem('user');
-  const token = localStorage.getItem('token');
-  
-  console.log('🔍 AuthContext init - user:', savedUser, 'token:', !!token);
-  
-  if (savedUser && token) {
-    setUser(JSON.parse(savedUser));
-  }
-}, []); // Empty array = runs once when app loads // Empty array = runs once on app start
-
-  // BACKEND SIGNUP
-  const signup = async (userData) => {
-    try {
-      const response = await fetch('https://modern-restaurant-website.onrender.com/api/auth/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(userData)
-      });
-      
-      const data = await response.json();
-      console.log('Signup response:', data);
-      
-      if (response.ok && data.success) {
-        setUser(data.user);
-        setIsAuthenticated(true);
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
-        return true;
+  // Load user from localStorage when app starts
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const savedUser = localStorage.getItem('user');
+    
+    console.log('🔍 AuthProvider init - token:', !!token, 'savedUser:', !!savedUser);
+    
+    if (token && savedUser) {
+      try {
+        const userData = JSON.parse(savedUser);
+        setUser(userData);
+        console.log('✅ User restored from localStorage:', userData.email);
+      } catch (e) {
+        console.error('Error parsing user:', e);
+        localStorage.removeItem('user');
       }
-      console.error('Signup failed:', data.message);
-      return false;
-    } catch (err) {
-      console.error('Signup error:', err);
-      return false;
     }
-  };
+    setLoading(false);
+  }, []);
 
-  // BACKEND LOGIN
+  // Login function
   const login = async (email, password) => {
     try {
       const response = await fetch('https://modern-restaurant-website.onrender.com/api/auth/login', {
@@ -58,117 +37,79 @@ useEffect(() => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
       });
-      
+
       const data = await response.json();
-      console.log('Login response:', data);
-      
+      console.log('🔐 Login response:', data);
+
       if (response.ok && data.success) {
-        setUser(data.user);
-        setIsAuthenticated(true);
+        // Save to localStorage
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
-        return true;
-      }
-      console.error('Login failed:', data.message);
-      return false;
-    } catch (err) {
-      console.error('Login error:', err);
-      return false;
-    }
-  };
-
-  // OTP LOGIN - Keep existing functionality
-  const otpLogin = (mobileNumber, userData = null) => {
-    console.log('otpLogin called with:', mobileNumber, userData);
-    
-    let userToSet;
-    
-    if (userData) {
-      userToSet = userData;
-    } else {
-      const users = JSON.parse(localStorage.getItem('users') || '[]');
-      let existingUser = users.find(u => u.phone === mobileNumber);
-      
-      if (existingUser) {
-        userToSet = existingUser;
-      } else {
-        userToSet = {
-          id: Date.now(),
-          phone: mobileNumber,
-          name: `User ${mobileNumber.slice(-4)}`,
-          email: `${mobileNumber}@phone.user`,
-          joinedDate: new Date().toISOString()
-        };
         
-        const updatedUsers = [...users, userToSet];
-        localStorage.setItem('users', JSON.stringify(updatedUsers));
+        // Update state
+        setUser(data.user);
+        
+        return { success: true, user: data.user };
+      } else {
+        return { success: false, message: data.message || 'Login failed' };
       }
+    } catch (error) {
+      console.error('Login error:', error);
+      return { success: false, message: 'Cannot connect to server' };
     }
-    
-    setUser(userToSet);
-    setIsAuthenticated(true);
-    localStorage.setItem('user', JSON.stringify(userToSet));
-    
-    console.log('User set in AuthContext:', userToSet);
-    console.log('isAuthenticated set to true');
-    
-    return true;
   };
 
+  // Signup function
+  const signup = async (userData) => {
+    try {
+      const response = await fetch('https://modern-restaurant-website.onrender.com/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userData)
+      });
+
+      const data = await response.json();
+      console.log('📝 Signup response:', data);
+
+      if (response.ok && data.success) {
+        // Save to localStorage
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        
+        // Update state
+        setUser(data.user);
+        
+        return { success: true, user: data.user };
+      } else {
+        return { success: false, message: data.message || 'Signup failed' };
+      }
+    } catch (error) {
+      console.error('Signup error:', error);
+      return { success: false, message: 'Cannot connect to server' };
+    }
+  };
+
+  // Logout function
   const logout = () => {
-    setUser(null);
-    setIsAuthenticated(false);
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    setUser(null);
   };
 
-  const updateProfile = async (updatedData) => {
-    // Try backend update first
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('https://modern-restaurant-website.onrender.com/api/auth/me', {
-        method: 'PUT',
-headers: {
-  'Content-Type': 'application/json',
-  'Authorization': `Bearer ${token}`   // ✅ This is correct
-},
-        body: JSON.stringify(updatedData)
-      });
-      
-      if (response.ok) {
-        const updatedUser = { ...user, ...updatedData };
-        setUser(updatedUser);
-        localStorage.setItem('user', JSON.stringify(updatedUser));
-        return true;
-      }
-    } catch (err) {
-      console.error('Profile update error:', err);
-    }
-    
-    // Fallback to localStorage update
-    const updatedUser = { ...user, ...updatedData };
+  // Update profile function
+  const updateProfile = (updatedUser) => {
     setUser(updatedUser);
-    setIsAuthenticated(true);
     localStorage.setItem('user', JSON.stringify(updatedUser));
-    
-    const users = JSON.parse(localStorage.getItem('users') || '[]');
-    const userIndex = users.findIndex(u => u.id === updatedUser.id);
-    if (userIndex !== -1) {
-      users[userIndex] = updatedUser;
-      localStorage.setItem('users', JSON.stringify(users));
-    }
-    return true;
   };
 
   const value = {
     user,
-    isAuthenticated,
     loading,
-    signup,
     login,
-    otpLogin,
+    signup,
     logout,
-    updateProfile
+    updateProfile,
+    isAuthenticated: !!user && !!localStorage.getItem('token')
   };
 
   return (

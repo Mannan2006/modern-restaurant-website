@@ -18,6 +18,14 @@ const Profile = () => {
     address: user?.address || ''
   });
 
+  // Check authentication on mount
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      navigate('/login');
+    }
+  }, [navigate]);
+
   // Fetch latest user data from backend when component mounts
   useEffect(() => {
     const fetchUserData = async () => {
@@ -29,9 +37,8 @@ const Profile = () => {
           return;
         }
         
-        console.log('Fetching user data with token:', token.substring(0, 30) + '...');
+        console.log('📝 Fetching user data...');
         
-        // ✅ FIX: Use Authorization: Bearer header
         const response = await fetch('https://modern-restaurant-website.onrender.com/api/auth/me', {
           method: 'GET',
           headers: {
@@ -40,23 +47,26 @@ const Profile = () => {
           }
         });
         
-        console.log('Fetch user data response status:', response.status);
+        console.log('📝 Fetch response status:', response.status);
         
         if (response.ok) {
-          const userData = await response.json();
-          console.log('User data received:', userData);
+          const data = await response.json();
+          const userData = data.user || data;
+          console.log('📝 User data received:', userData);
+          
           setFormData({
             name: userData.name || '',
             email: userData.email || '',
             phone: userData.phone || '',
             address: userData.address || ''
           });
+          
           // Update AuthContext with latest data
           if (updateProfile) {
             updateProfile(userData);
           }
-        } else if (response.status === 401 || response.status === 403) {
-          console.log('Token invalid, redirecting to login');
+        } else if (response.status === 401) {
+          console.log('Token expired, redirecting to login');
           localStorage.removeItem('token');
           localStorage.removeItem('user');
           navigate('/login');
@@ -66,10 +76,8 @@ const Profile = () => {
       }
     };
     
-    if (user) {
-      fetchUserData();
-    }
-  }, [user, updateProfile, navigate]);
+    fetchUserData();
+  }, [updateProfile, navigate]);
 
   if (!user) {
     navigate('/login');
@@ -98,10 +106,14 @@ const Profile = () => {
         return;
       }
       
-      console.log('Updating profile with token:', token.substring(0, 30) + '...');
+      console.log('📝 Updating profile...');
+      console.log('📝 Update data:', { 
+        name: formData.name, 
+        phone: formData.phone, 
+        address: formData.address 
+      });
       
-      // ✅ FIX: Use correct endpoint and Authorization header
-      const response = await fetch('https://modern-restaurant-website.onrender.com/api/auth/profile', {
+      const response = await fetch('https://modern-restaurant-website.onrender.com/api/auth/me', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -109,18 +121,19 @@ const Profile = () => {
         },
         body: JSON.stringify({
           name: formData.name,
-          phone: formData.phone,
-          address: formData.address
+          phone: formData.phone || '',
+          address: formData.address || ''
         })
       });
       
-      console.log('Update profile response status:', response.status);
-      const data = await response.json();
-      console.log('Update profile response data:', data);
+      console.log('📝 Update response status:', response.status);
       
-      if (response.ok) {
+      const data = await response.json();
+      console.log('📝 Update response data:', data);
+      
+      if (response.ok && data.success) {
         // Update localStorage with new user data
-        const updatedUser = data.user || data;
+        const updatedUser = data.user;
         localStorage.setItem('user', JSON.stringify(updatedUser));
         
         // Update AuthContext with updated data
